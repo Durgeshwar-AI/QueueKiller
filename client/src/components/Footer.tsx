@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 const Footer = () => {
   return (
     <motion.footer
-      className="bg-gray-900 text-white py-6 mt-12 w-full absolute bottom-0"
+      className="bg-gray-900 text-white py-6 mt-12 w-full"
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: "easeOut" }}

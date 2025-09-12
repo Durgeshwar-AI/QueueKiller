@@ -1,16 +1,14 @@
 import { Route, Routes } from "react-router-dom";
-import Footer from "./components/Footer";
-import Navbar from "./components/Navbar";
 import Landing from "./pages/Landing";
+import Booking from "./pages/Booking";
 
 const App = () => {
   return (
     <div className="flex flex-col min-h-screen relative">
-      <Navbar />
-      <Routes>
+      <Routes >
         <Route path="/" element={<Landing />} />
+        <Route path="/booking" element={<Booking />} />
       </Routes>
-      <Footer />
     </div>
   );
 };
