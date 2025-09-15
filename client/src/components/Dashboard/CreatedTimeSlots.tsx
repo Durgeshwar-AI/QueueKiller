@@ -140,17 +140,6 @@ const CreatedTimeSlots = () => {
     setCreatedTimeSlots((prev) => prev.filter((slot) => slot.id !== id));
   };
 
-  const handleStatusChange = (
-    id: string | number,
-    newStatus: "available" | "booked" | "cancelled"
-  ) => {
-    setCreatedTimeSlots((prev) =>
-      prev.map((slot) =>
-        slot.id === id ? { ...slot, status: newStatus } : slot
-      )
-    );
-  };
-
   return (
     <div className="space-y-6">
       {/* Filter Tabs */}
@@ -239,21 +228,6 @@ const CreatedTimeSlots = () => {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  {/* Status Change Dropdown */}
-                  <select
-                    value={slot.status}
-                    onChange={(e) =>
-                      handleStatusChange(
-                        slot.id,
-                        e.target.value as "available" | "booked" | "cancelled"
-                      )
-                    }
-                    className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="available">Available</option>
-                    <option value="booked">Booked</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
 
                   {/* Edit Button */}
                   <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors">

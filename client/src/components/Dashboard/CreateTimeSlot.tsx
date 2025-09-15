@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import type { AxiosResponse } from "axios";
 
 const CreateTimeSlot = () => {
   const [formData, setFormData] = useState({
@@ -6,7 +8,9 @@ const CreateTimeSlot = () => {
     endTime: "",
     date: "",
     duration: "30",
+    department: "",
   });
+  const [departments, setDepartments] = useState<string[]>([]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -18,6 +22,26 @@ const CreateTimeSlot = () => {
     }));
   };
 
+  useEffect(() => {
+    getDepartments();
+  }, []);
+
+  const getDepartments = () => {
+    interface Department {
+      name: string;
+    }
+
+    axios
+      .get<Department[]>("/api/departments")
+      .then((response: AxiosResponse<Department[]>) => {
+        const departmentNames = response.data.map((dept) => dept.name);
+        setDepartments(departmentNames);
+        console.log("Fetched departments:", response.data);
+      })
+      .catch((error: unknown) => {
+        console.error("Error fetching departments:", error);
+      });
+  };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission
@@ -32,6 +56,7 @@ const CreateTimeSlot = () => {
       endTime: "",
       date: "",
       duration: "30",
+      department: "",
     });
   };
 
@@ -56,7 +81,31 @@ const CreateTimeSlot = () => {
             required
           />
         </div>
-
+        <div>
+          <label
+            htmlFor="date"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Select Department
+          </label>
+          <select
+            id="department"
+            name="department"
+            value={formData.department}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            required
+          >
+            <option value="" disabled>
+              -- Select Department --
+            </option>
+            {departments.map((dept) => ( 
+              <option key={dept} value={dept}>
+                {dept}
+              </option>
+            ))}
+          </select>
+        </div>
         {/* Start Time */}
         <div>
           <label
@@ -140,24 +189,6 @@ const CreateTimeSlot = () => {
           </div>
         </button>
       </form>
-
-      {/* Quick Actions */}
-      <div className="border-t border-gray-200 pt-6">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">
-          Quick Actions
-        </h3>
-        <div className="grid grid-cols-1 gap-2">
-          <button className="text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-            📅 Create recurring slots
-          </button>
-          <button className="text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-            📋 Import from template
-          </button>
-          <button className="text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-            ⚡ Bulk create slots
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
