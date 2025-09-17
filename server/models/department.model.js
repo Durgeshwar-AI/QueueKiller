@@ -3,47 +3,49 @@ import mongoose from "mongoose";
 const bookingSlots = new mongoose.Schema({
   date: {
     type: Date,
-    required: true
+    required: true,
   },
-  slots: [{
-    startTime: {
-      type: String,
-      required: true
+  slots: [
+    {
+      startTime: {
+        type: String,
+        required: true,
+      },
+      endTime: {
+        type: String,
+        required: true,
+      },
+      isBooked: {
+        type: Boolean,
+        default: false,
+      },
+      slotId: {
+        type: String,
+        required: true,
+        unique: true,
+      },
     },
-    endTime: {
-      type: String,
-      required: true
-    },
-    isBooked: {
-      type: Boolean,
-      default: false
-    },
-    slotId: {
-      type: String,
-      required: true,
-      unique: true
-    }
-  }]
+  ],
 });
 
 const departmentSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
   departmentId: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
-  charges:{
+  charges: {
     type: Number,
-    required: true
+    required: true,
   },
   availableSlots: {
     type: [bookingSlots],
-    required: true
-  }
+    required: true,
+  },
 });
 
-module.exports = mongoose.model('Department', departmentSchema);
+export default mongoose.model("Department", departmentSchema);
