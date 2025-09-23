@@ -8,7 +8,6 @@ import { config } from "dotenv";
 import scheduleRoutes from './routes/schedule.route.js'
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 config();
 
 // Middleware
@@ -18,9 +17,11 @@ app.use(bodyParser.json());
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(scheduleRoutes)
 
-// Routes
+const PORT = process.env.PORT || 3000;
+
+app.use('/api/schedule',scheduleRoutes)
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });

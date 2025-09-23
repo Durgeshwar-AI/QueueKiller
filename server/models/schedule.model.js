@@ -1,6 +1,6 @@
 import mongoose, { mongo, Schema } from "mongoose";
 
-const schedules = new Schema({
+const schedulesSchema = new Schema({
     id: {
         type: String,
         required: true,
@@ -24,5 +24,7 @@ const schedules = new Schema({
         default: null
     }
 })
+
+const schedules = new mongoose.model("Schedule",schedulesSchema)
 
 export default schedules;

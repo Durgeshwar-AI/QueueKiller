@@ -6,5 +6,5 @@ export const createScheduleId = async () => {
   }
 
   const scheduleCount = await schedules.countDocuments()
-  return `c+${padThreeDigits(scheduleCount + 1)}`;
+  return `c-${padThreeDigits(scheduleCount + 1)}`;
 };

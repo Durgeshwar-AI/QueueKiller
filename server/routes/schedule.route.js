@@ -3,7 +3,7 @@ import { bookSchedule, createSchedule, getSchedule } from "../controllers/schedu
 
 const router = Router();
 
-router.post('/schedule',getSchedule)
+router.get('/',getSchedule)
 router.post('/create',createSchedule)
 router.put('/book',bookSchedule)
 
