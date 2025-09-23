@@ -5,6 +5,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import { connectDB } from "./utils/db.js";
 import { config } from "dotenv";
+import scheduleRoutes from './routes/schedule.route.js'
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,6 +17,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(scheduleRoutes)
 
 // Routes
 app.get("/", (req, res) => {

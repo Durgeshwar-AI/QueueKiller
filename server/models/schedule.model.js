@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import mongoose, { mongo, Schema } from "mongoose";
 
 const schedules = new Schema({
     id: {
@@ -18,6 +18,10 @@ const schedules = new Schema({
     end: {
         type: String,
         required: true
+    },
+    customerId: {
+        type: mongoose.Schema.ObjectId,
+        default: null
     }
 })
 

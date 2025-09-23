@@ -1,4 +1,5 @@
 import Schedule from "../models/schedule.model.js";
+import { createScheduleId } from "../services/schedule.service.js";
 
 export const getSchedule = async (req, res) => {
     try {
@@ -11,12 +12,32 @@ export const getSchedule = async (req, res) => {
 };
 
 export const createSchedule = async (req, res) => {
-    const { id, start, end } = req.body;
+    const {start, end } = req.body;
     try {
+        const id = await createScheduleId()
         const newSchedule = new Schedule({id,start,end})
         await newSchedule.save();
         res.status(201).json({message:"Schedule created successfully"})
     }catch(err){
-        res.status(500).json({message: "Error occured", error: err})
+        res.status(500).json({message: "Error occured", error: err.message})
     }
+}
+
+export const bookSchedule = async (req, res)=>{
+    const { id, cid } = req.body;
+  try {
+    const schedule = await Schedule.findOne({ id });
+    if (!schedule) {
+      return res.status(404).json({ message: "Schedule not found" });
+    }
+    if (schedule.booked) {
+      return res.status(400).json({ message: "Already booked" });
+    }
+    schedule.booked = true;
+    schedule.customerId = cid;
+    await schedule.save();
+    res.status(200).json({ message: "Booked successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 }
