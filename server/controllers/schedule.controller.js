@@ -43,3 +43,16 @@ export const bookSchedule = async (req, res)=>{
     res.status(500).json({ message: err.message });
   }
 }
+
+export const deleteSchedule = async (req, res) => {
+  const {id} = req.body
+  try {
+    const schedule = await Schedule.findOne({id})
+    if(schedule.booked === true){
+      res.status(501).json({message : "Already booked can't delete"})
+    }
+    await schedule.deleteOne();
+  }catch(err){
+    res.status(500).json({error : err})
+  }
+}
