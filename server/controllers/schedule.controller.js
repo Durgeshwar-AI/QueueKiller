@@ -25,8 +25,10 @@ export const createSchedule = async (req, res) => {
 
 export const bookSchedule = async (req, res)=>{
     const { id, cid } = req.body;
+    console.log(id)
   try {
     const schedule = await Schedule.findOne({ id });
+    console.log('booking')
     if (!schedule) {
       return res.status(404).json({ message: "Schedule not found" });
     }
