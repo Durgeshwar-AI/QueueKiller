@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 
-const CreateSchedule = () => {
+const CreateSchedule = ({ onCreated }: { onCreated: () => void }) => {
   const [start, setStart] = useState<string>("");
   const [end, setEnd] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -29,6 +29,7 @@ const CreateSchedule = () => {
       setStart("");
       setEnd("");
       setSuccess(true);
+      onCreated();
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: unknown) {
       console.error("Error creating schedule:", err);
