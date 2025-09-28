@@ -1,10 +1,5 @@
-import schedules from "../models/schedule.model.js";
+import crypto from "crypto";
 
 export const createScheduleId = async () => {
-  function padThreeDigits(number) {
-    return String(number).padStart(3, "0");
-  }
-
-  const scheduleCount = await schedules.countDocuments()
-  return `c-${padThreeDigits(scheduleCount + 1)}`;
+  return `s-${crypto.randomBytes(16).toString("hex")}`;
 };
