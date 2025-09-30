@@ -4,8 +4,13 @@ import { createScheduleId } from "../services/schedule.service.js";
 export const getSchedule = async (req, res) => {
   const { date } = req.params;
   try {
-    const schedules = await Schedule.find({ date });
-    res.status(200).json(schedules.schedules);
+    const scheduleDoc = await Schedule.findOne({ date });
+    if (!scheduleDoc) {
+      return res
+        .status(404)
+        .json({ error: "No schedules found for this date" });
+    }
+    res.status(200).json({ schedule: scheduleDoc.schedules });
   } catch (error) {
     console.error("Error fetching schedules:", error);
     res.status(500).json({ error: "Failed to fetch schedules" });
@@ -23,11 +28,15 @@ export const createSchedule = async (req, res) => {
         schedules: [{ id, start, end }],
       });
       await newSchedule.save();
-      res.status(201).json({ message: "Schedule created successfully" });
+      res.status(201).json({
+        message: "Schedule created successfully",
+      });
     } else {
       existingSchedule.schedules.push({ start, end });
       await existingSchedule.save();
-      res.status(200).json({ message: "Schedule updated successfully" });
+      res.status(200).json({
+        message: "Schedule updated successfully",
+      });
     }
   } catch (err) {
     res.status(500).json({ message: "Error occured", error: err.message });
