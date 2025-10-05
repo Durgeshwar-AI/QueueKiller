@@ -3,10 +3,10 @@ import {
   createSchedule,
   deleteSchedule,
   getSchedule,
-} from "../controllers/schedule.controller";
-import Schedule from "../models/schedule.model";
+} from "../../controllers/schedule.controller";
+import Schedule from "../../models/schedule.model";
 
-jest.mock("../models/schedule.model");
+jest.mock("../../models/schedule.model");
 
 describe("createSchedule controller", () => {
   beforeEach(() => {
