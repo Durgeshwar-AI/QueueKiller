@@ -8,42 +8,63 @@ interface Schedule {
   booked: boolean;
 }
 
+const getISODate = (d = new Date()) => d.toISOString().split("T")[0];
+
 const BookSchedule = () => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [date, setDate] = useState<string>(getISODate());
 
-  const fetchData = async () => {
+  const fetchData = async (date: string) => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.get("http://localhost:8000/api/schedule/");
-      const sorted = res.data.sort((a: Schedule, b: Schedule) =>
+      const res = await axios.get("http://localhost:8000/api/schedule/", {
+        params: {
+          date,
+        },
+      });
+
+      // Handle the response structure properly
+      const schedulesData = res.data.schedule || res.data.schedules || [];
+
+      if (schedulesData.length === 0) {
+        setSchedules([]);
+        setError(null);
+        return;
+      }
+
+      const sorted = schedulesData.sort((a: Schedule, b: Schedule) =>
         a.start.localeCompare(b.start)
       );
       setSchedules(sorted);
     } catch (err) {
-      console.error(err);
-      setError("Failed to load schedules. Please try again.");
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
+        setError(null);
+      } else {
+        setError("Failed to load schedules. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(getISODate());
   }, []);
 
   const book = async (id: string) => {
     try {
       setBookingId(id);
       const res = await axios.put("http://localhost:8000/api/schedule/book", {
+        date: date,
         id: id,
         cid: "66f4d8e9c2c7a2f8b4d3c123",
       });
       console.log(res);
-      await fetchData();
+      await fetchData(date);
     } catch (err) {
       console.log(err);
       setError("Failed to book schedule. Please try again.");
@@ -65,6 +86,11 @@ const BookSchedule = () => {
     } catch {
       return time;
     }
+  };
+
+  const handleDateChange = (date: string) => {
+    setDate(date);
+    fetchData(date);
   };
 
   return (
@@ -131,6 +157,23 @@ const BookSchedule = () => {
           </div>
         )}
 
+        <div className="mb-6 bg-white rounded-xl p-4 shadow-md border border-gray-200">
+          <label
+            htmlFor="date"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Select Date
+          </label>
+          <input
+            type="date"
+            name="date"
+            id="date"
+            value={date}
+            onChange={(e) => handleDateChange(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+          />
+        </div>
+
         {/* Loading State */}
         {loading ? (
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-12 text-center">
@@ -191,7 +234,9 @@ const BookSchedule = () => {
                     There are currently no time slots available for booking.
                   </p>
                   <button
-                    onClick={fetchData}
+                    onClick={() => {
+                      fetchData(date);
+                    }}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                   >
                     Refresh
@@ -204,7 +249,9 @@ const BookSchedule = () => {
                       Available Time Slots
                     </h2>
                     <button
-                      onClick={fetchData}
+                      onClick={() => {
+                        fetchData(date);
+                      }}
                       disabled={loading}
                       className="text-indigo-600 hover:text-indigo-700 font-medium text-sm flex items-center"
                     >
@@ -228,7 +275,11 @@ const BookSchedule = () => {
                   {schedules.map((schedule) => (
                     <div
                       key={schedule.id}
-                      className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow bg-gray-50"
+                      className={`flex items-center justify-between p-6 rounded-xl border transition-all duration-200 hover:shadow-lg ${
+                        schedule.booked
+                          ? "border-gray-200 bg-gray-50 opacity-75"
+                          : "border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100"
+                      }`}
                     >
                       <div className="flex items-center space-x-4">
                         <div className="flex-shrink-0">
@@ -299,7 +350,7 @@ const BookSchedule = () => {
                           <button
                             onClick={() => book(schedule.id)}
                             disabled={bookingId === schedule.id}
-                            className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white font-semibold py-2 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center"
+                            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-green-400 disabled:to-emerald-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center"
                           >
                             {bookingId === schedule.id ? (
                               <>

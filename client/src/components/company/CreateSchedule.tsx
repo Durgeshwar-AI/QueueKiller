@@ -4,6 +4,7 @@ import React, { useState } from "react";
 const CreateSchedule = ({ onCreated }: { onCreated: () => void }) => {
   const [start, setStart] = useState<string>("");
   const [end, setEnd] = useState<string>("");
+  const [date, setDate] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
 
@@ -11,6 +12,10 @@ const CreateSchedule = ({ onCreated }: { onCreated: () => void }) => {
     e.preventDefault();
     if (start > end) {
       alert("Start time must be before end time");
+      return;
+    }
+    if (date === "") {
+      alert("Date is mandatory");
       return;
     }
 
@@ -21,10 +26,12 @@ const CreateSchedule = ({ onCreated }: { onCreated: () => void }) => {
       const res = await axios.post(
         "http://localhost:8000/api/schedule/create",
         {
+          date,
           start,
           end,
         }
       );
+      
       console.log(res.data);
       setStart("");
       setEnd("");
@@ -89,6 +96,24 @@ const CreateSchedule = ({ onCreated }: { onCreated: () => void }) => {
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
           <div className="px-8 py-6">
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label
+                  className="group block cursor-pointer text-sm font-semibold text-gray-700"
+                  htmlFor="date"
+                >
+                  <div className="flex items-center justify-between w-full p-2 rounded-lg hover:bg-gray-50 transition">
+                    <span className="select-none">Date</span>
+                    <input
+                      type="date"
+                      id="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      required
+                      className="ml-4 w-auto min-w-[120px] px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 text-gray-900 bg-white"
+                    />
+                  </div>
+                </label>
+              </div>
               {/* Start Time Input - entire row clickable */}
               <div className="space-y-2">
                 <label

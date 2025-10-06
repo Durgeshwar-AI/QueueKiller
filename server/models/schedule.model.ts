@@ -16,7 +16,6 @@ const singleScheduleSchema = new Schema<ISingleSchedule>({
   id: {
     type: String,
     required: true,
-    unique: true,
   },
   booked: {
     type: Boolean,
