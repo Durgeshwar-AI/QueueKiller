@@ -2,11 +2,10 @@
   "name": "server",
   "version": "2.0.0",
   "main": "app.js",
-  "type": "module",
   "scripts": {
     "test": "jest",
     "start": "node dist/app.ts",
-    "dev": "ts-node-dev --respawn --transpile-only nodemon app.ts",
+    "dev": "ts-node app.ts",
     "build": "tsc",
     "lint": "eslint ."
   },
@@ -29,9 +28,12 @@
   "devDependencies": {
     "@babel/core": "^7.28.4",
     "@babel/preset-env": "^7.28.3",
+    "@babel/preset-typescript": "^7.27.1",
     "@eslint/js": "^9.37.0",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^24.6.2",
     "babel-jest": "^30.2.0",
     "eslint": "^9.37.0",

@@ -3,9 +3,9 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import morgan from "morgan";
 import helmet from "helmet";
-import { connectDB } from "./utils/db.js";
+import { connectDB } from "./utils/db";
 import { config } from "dotenv";
-import scheduleRoutes from './routes/schedule.route.js'
+import scheduleRoutes from './routes/schedule.route'
 
 const app = express();
 config();

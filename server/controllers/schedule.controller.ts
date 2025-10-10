@@ -1,5 +1,5 @@
-import Schedule from "../models/schedule.model.js";
-import { createScheduleId } from "../services/schedule.service.js";
+import Schedule from "../models/schedule.model";
+import { createScheduleId } from "../services/schedule.service";
 import type { Request, Response } from "express";
 
 interface GetScheduleRequest extends Request {

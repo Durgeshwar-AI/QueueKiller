@@ -7,7 +7,7 @@ import { globalIgnores } from "eslint/config";
 export default defineConfig([
   globalIgnores(["dist", "tests"]),
   {
-    files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
+    files: ["**/*.{js,mjs,cjs,ts,mts,cts,ts}"],
     plugins: { js },
     extends: ["js/recommended"],
     languageOptions: { globals: globals.browser },

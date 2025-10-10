@@ -6,7 +6,12 @@ import {
 } from "../../controllers/schedule.controller";
 import Schedule from "../../models/schedule.model";
 
-jest.mock("../../models/schedule.model");
+jest.unstable_mockModule("../../models/schedule.model.js", () => ({
+  default: {
+    findOne: jest.fn(),
+    create: jest.fn(),
+  },
+}));
 
 describe("createSchedule controller", () => {
   beforeEach(() => {
