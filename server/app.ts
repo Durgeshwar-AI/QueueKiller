@@ -5,7 +5,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import { connectDB } from "./utils/db";
 import { config } from "dotenv";
-import scheduleRoutes from './routes/schedule.route'
+import scheduleRoutes from "./routes/schedule.route";
 
 const app = express();
 config();
@@ -17,15 +17,13 @@ app.use(bodyParser.json());
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
 const PORT = process.env.PORT || 3000;
 
-app.use('/api/schedule',scheduleRoutes)
+app.use("/api/schedule", scheduleRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
-
 
 app.listen(PORT, async () => {
   try {
