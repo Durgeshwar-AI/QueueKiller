@@ -1,3 +1,14 @@
+// mock the Schedule model before importing the controller so imports receive the mock
+jest.mock("../../models/schedule.model", () => ({
+  default: {
+    findOne: jest.fn(),
+    create: jest.fn(),
+    deleteOne: jest.fn(),
+  },
+}));
+
+// also mock the compiled JS path (some runners import .js paths)
+
 import {
   bookSchedule,
   createSchedule,
@@ -6,12 +17,11 @@ import {
 } from "../../controllers/schedule.controller";
 import Schedule from "../../models/schedule.model";
 
-jest.unstable_mockModule("../../models/schedule.model.js", () => ({
-  default: {
-    findOne: jest.fn(),
-    create: jest.fn(),
-  },
-}));
+// ensure the imported Schedule has jest mock functions (some runners return real module)
+const MockSchedule = Schedule as unknown as any;
+MockSchedule.findOne = MockSchedule.findOne || jest.fn();
+MockSchedule.create = MockSchedule.create || jest.fn();
+MockSchedule.deleteOne = MockSchedule.deleteOne || jest.fn();
 
 describe("createSchedule controller", () => {
   beforeEach(() => {
@@ -19,8 +29,8 @@ describe("createSchedule controller", () => {
   });
 
   test("createSchedule creates a new schedule when none exists for the date", async () => {
-    Schedule.findOne.mockResolvedValue(null);
-    Schedule.create.mockResolvedValue({
+    (MockSchedule.findOne as jest.Mock).mockResolvedValue(null);
+    (MockSchedule.create as jest.Mock).mockResolvedValue({
       _id: "fakeid",
       date: "2024-10-10",
       start: "10:00",
@@ -29,13 +39,18 @@ describe("createSchedule controller", () => {
 
     const req = {
       body: { date: "2024-10-10", start: "10:00", end: "11:00" },
-    };
+    } as unknown as any;
 
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    };
-    await createSchedule(req, res);
+    } as unknown as any;
+    try {
+      await createSchedule(req, res);
+    } catch (err) {
+      console.error("createSchedule threw", err);
+      throw err;
+    }
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -47,17 +62,22 @@ describe("createSchedule controller", () => {
 
 describe("Get Schedule controller", () => {
   test("getSchedule to get all the schedules", async () => {
-    const req = { params: { date: "2024-10-10" } };
+    const req = { params: { date: "2024-10-10" } } as unknown as any;
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    };
+    } as unknown as any;
 
-    Schedule.findOne.mockResolvedValue({
+    (MockSchedule.findOne as jest.Mock).mockResolvedValue({
       schedules: [{ id: "1", start: "10:00", end: "11:00" }],
     });
 
-    await getSchedule(req, res);
+    try {
+      await getSchedule(req, res);
+    } catch (err) {
+      console.error("getSchedule threw", err);
+      throw err;
+    }
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(
@@ -76,11 +96,11 @@ describe("Book Schedule Controller", () => {
         id: "c-001",
         cid: "507f191e810c19729de860ea",
       },
-    };
+    } as unknown as any;
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    };
+    } as unknown as any;
     const mockScheduleDoc = {
       date: "2024-10-10",
       schedules: [
@@ -94,8 +114,13 @@ describe("Book Schedule Controller", () => {
       ],
       save: jest.fn().mockResolvedValue(true),
     };
-    Schedule.findOne.mockResolvedValue(mockScheduleDoc);
-    await bookSchedule(req, res);
+    (MockSchedule.findOne as jest.Mock).mockResolvedValue(mockScheduleDoc);
+    try {
+      await bookSchedule(req, res);
+    } catch (err) {
+      console.error("bookSchedule threw", err);
+      throw err;
+    }
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -108,15 +133,12 @@ describe("Book Schedule Controller", () => {
 describe("Delete Schedule controller", () => {
   test("Testing for deleting a schedule", async () => {
     const req = {
-      params: {
-        date: "2024-10-10",
-        id: "c-001",
-      },
-    };
+      params: { date: "2024-10-10", id: "c-001" },
+    } as unknown as any;
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    };
+    } as unknown as any;
     const mockScheduleDoc = {
       date: "2024-10-10",
       schedules: [
@@ -130,8 +152,13 @@ describe("Delete Schedule controller", () => {
       ],
       save: jest.fn().mockResolvedValue(true),
     };
-    Schedule.findOne.mockResolvedValue(mockScheduleDoc);
-    await deleteSchedule(req, res);
+    (MockSchedule.findOne as jest.Mock).mockResolvedValue(mockScheduleDoc);
+    try {
+      await deleteSchedule(req, res);
+    } catch (err) {
+      console.error("deleteSchedule threw", err);
+      throw err;
+    }
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({

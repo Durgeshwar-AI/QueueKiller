@@ -5,7 +5,7 @@
   "scripts": {
     "test": "jest",
     "start": "node dist/app.ts",
-    "dev": "nodemon",
+    "dev": "nodemon src/app.ts",
     "build": "tsc",
     "lint": "eslint ."
   },
@@ -30,6 +30,7 @@
     "@babel/preset-env": "^7.28.3",
     "@babel/preset-typescript": "^7.27.1",
     "@eslint/js": "^9.37.0",
+    "@jest/globals": "^30.2.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
@@ -43,7 +44,7 @@
     "mongodb-memory-server": "^10.2.2",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4",
-    "ts-jest": "^29.4.4",
+    "ts-jest": "^29.4.5",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.45.0"
