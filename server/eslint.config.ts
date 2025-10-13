@@ -10,11 +10,21 @@ export default defineConfig([
     files: ["**/*.{js,mjs,cjs,ts,mts,cts,ts}"],
     plugins: { js },
     extends: ["js/recommended"],
-    languageOptions: { globals: globals.browser, ...globals.jest },
-    rules: {
-      'no-unused-vars': 'warn',
-      'no-undef': 'warn',
+    languageOptions: {
+      ecamVersion: "latest",
+      globals: globals.browser,
+      ...globals.jest,
     },
+    rules: {
+      "no-unused-vars": "warn",
+      "no-undef": "warn",
+      semi: "error",
+      "prefer-const": "error",
+    },
+    ignores: ["__tests/**"],
+    linterOptions: {
+      noInlineConfig: true
+    }
   },
   tseslint.configs.recommended,
 ]);
