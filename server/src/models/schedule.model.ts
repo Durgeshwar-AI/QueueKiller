@@ -8,6 +8,8 @@ export interface ISingleSchedule {
   customerId?: Types.ObjectId | null;
 }
 export interface ISchedule extends Document {
+  company: string;
+  department: string;
   date: string;
   schedules: ISingleSchedule[];
 }
@@ -37,6 +39,15 @@ const singleScheduleSchema = new Schema<ISingleSchedule>({
 });
 
 const schedulesSchema = new Schema<ISchedule>({
+  company:{
+    type: String,
+    required: true,
+  },
+  department:{
+    type: String,
+    required: true,
+    default: "General"
+  },
   date: {
     type: String,
     required: true,

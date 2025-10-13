@@ -1,21 +1,19 @@
-import Schedule from "../models/schedule.model";
+import { Types } from "mongoose";
+import Schedule, { ISingleSchedule } from "../models/schedule.model";
 import { createScheduleId } from "../services/schedule.service";
 import type { Request, Response } from "express";
 
-interface GetScheduleRequest extends Request {
-  query: {
-    date: string;
-  };
-}
 
 export const getSchedule = async (
-  req: GetScheduleRequest,
-  res: Response
+  req: Request<{},{},{},{company: string; department?: string; date:string}>,
+  res: Response<{ schedule?: ISingleSchedule[]; error?: string }>
 ): Promise<void> => {
   // accept date from query (usual) or params (tests / some routes)
+  const company = req.query?.company || (req as any).params?.company;
+  const department = req.query?.department || (req as any).params?.department;
   const date = req.query?.date || (req as any).params?.date;
   try {
-    const scheduleDoc = await Schedule.findOne({ date });
+    const scheduleDoc = await Schedule.findOne({company, department, date });
     if (!scheduleDoc) {
       res.status(204).json({ error: "No schedules found for this date" });
       return;
@@ -28,17 +26,15 @@ export const getSchedule = async (
 };
 
 export const createSchedule = async (
-  req: Request,
-  res: Response
+  req: Request<{},{company: string; department?: string; date:string, start: string, end: string}>,
+  res: Response<{ message: string; error?: string }>
 ): Promise<void> => {
-  const { date, start, end } = req.body;
+  const { company, department, date, start, end } = req.body;
   try {
-    const existingSchedule = await Schedule.findOne({ date });
+    const existingSchedule = await Schedule.findOne({company, department, date });
     if (!existingSchedule) {
       const id = createScheduleId();
-      console.log(id);
-      // use Model.create so tests that mock Schedule.create work correctly
-      await Schedule.create({ date, schedules: [{ id, start, end }] });
+      await Schedule.create({ company , ...(department && { department }),date, schedules: [{ id, start, end }] });
       res.status(201).json({
         message: "Schedule created successfully",
       });
@@ -58,12 +54,12 @@ export const createSchedule = async (
 };
 
 export const bookSchedule = async (
-  req: Request,
-  res: Response
+  req: Request<{},{schedulesId: string, id: string, cid: string}>,
+  res: Response<{ message?: string; error?: string }>
 ): Promise<void> => {
-  const { date, id, cid } = req.body;
+  const { schedulesId, id, cid } = req.body;
   try {
-    const schedule = await Schedule.findOne({ date });
+    const schedule = await Schedule.findOne({ _id: schedulesId });
     const currentSchedule = schedule?.schedules?.find((s) => s.id === id);
     if (
       !schedule ||
@@ -71,7 +67,7 @@ export const bookSchedule = async (
       schedule.schedules.length === 0 ||
       !currentSchedule
     ) {
-      res.status(204).json({ message: "Schedule not found" });
+      res.status(204).json({ error: "No schedules found for this date" });
       return;
     }
     if (currentSchedule.booked) {
@@ -79,7 +75,7 @@ export const bookSchedule = async (
       return;
     }
     currentSchedule.booked = true;
-    currentSchedule.customerId = cid;
+    currentSchedule.customerId = Types.ObjectId.createFromHexString(cid);;
     await schedule.save();
     res.status(200).json({ message: "Booked successfully" });
   } catch (err) {
@@ -90,7 +86,7 @@ export const bookSchedule = async (
 
 export const deleteSchedule = async (
   req: Request<{ id: string }>,
-  res: Response
+  res: Response<{ message: string; error?: string }>
 ): Promise<void> => {
   const { id } = req.params;
   try {
