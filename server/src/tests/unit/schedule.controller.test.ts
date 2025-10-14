@@ -32,6 +32,7 @@ describe("createSchedule controller", () => {
     (MockSchedule.findOne as jest.Mock).mockResolvedValue(null);
     (MockSchedule.create as jest.Mock).mockResolvedValue({
       _id: "fakeid",
+      company: "ABC",
       date: "2024-10-10",
       start: "10:00",
       end: "11:00",
@@ -62,7 +63,7 @@ describe("createSchedule controller", () => {
 
 describe("Get Schedule controller", () => {
   test("getSchedule to get all the schedules", async () => {
-    const req = { params: { date: "2024-10-10" } } as unknown as any;
+    const req = { params: { company: "ABC", department: "General" ,date: "2024-10-10" } } as unknown as any;
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),

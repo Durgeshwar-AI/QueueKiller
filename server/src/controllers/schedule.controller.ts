@@ -5,7 +5,7 @@ import type { Request, Response } from "express";
 
 
 export const getSchedule = async (
-  req: Request<{},{},{},{company: string; department?: string; date:string}>,
+  req: Request<{},{},{},{company: string; department: string; date:string}>,
   res: Response<{ schedule?: ISingleSchedule[]; error?: string }>
 ): Promise<void> => {
   // accept date from query (usual) or params (tests / some routes)
