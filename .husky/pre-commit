@@ -1,0 +1,2 @@
+npm --prefix client run lint:fix
+npm --prefix server run lint:fix

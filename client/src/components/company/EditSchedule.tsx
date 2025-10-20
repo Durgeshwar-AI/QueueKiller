@@ -29,12 +29,16 @@ const EditSchedule = ({
   const deleteSchedule = async (id: string) => {
     try {
       await axios.delete(`http://localhost:8000/api/schedule/delete/${id}`);
-      await refresh(date);
-    } catch (err: any) {
+      refresh(date);
+    } catch (err: unknown) {
       console.log(err);
-      if (err.response?.status === 400)
-        setError("Can't delete a schedule that is already booked!");
-      else setError("Failed to delete schedule. Please try again.");
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 400)
+          setError("Can't delete a schedule that is already booked!");
+        else setError("Failed to delete schedule. Please try again.");
+      } else {
+        setError("Failed to delete schedule. Please try again.");
+      }
     }
   };
 

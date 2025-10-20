@@ -39,14 +39,14 @@ const singleScheduleSchema = new Schema<ISingleSchedule>({
 });
 
 const schedulesSchema = new Schema<ISchedule>({
-  company:{
+  company: {
     type: String,
     required: true,
   },
-  department:{
+  department: {
     type: String,
     required: true,
-    default: "General"
+    default: "General",
   },
   date: {
     type: String,
@@ -55,6 +55,9 @@ const schedulesSchema = new Schema<ISchedule>({
   schedules: [singleScheduleSchema],
 });
 
-const Schedule: Model<ISchedule> = mongoose.model<ISchedule>("Schedule", schedulesSchema);
+const Schedule: Model<ISchedule> = mongoose.model<ISchedule>(
+  "Schedule",
+  schedulesSchema,
+);
 
 export default Schedule;

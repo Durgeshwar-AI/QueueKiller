@@ -56,14 +56,16 @@ describe("createSchedule controller", () => {
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "Schedule created successfully",
-      })
+      }),
     );
   });
 });
 
 describe("Get Schedule controller", () => {
   test("getSchedule to get all the schedules", async () => {
-    const req = { params: { company: "ABC", department: "General" ,date: "2024-10-10" } } as unknown as any;
+    const req = {
+      params: { company: "ABC", department: "General", date: "2024-10-10" },
+    } as unknown as any;
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
@@ -84,7 +86,7 @@ describe("Get Schedule controller", () => {
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         schedule: expect.any(Array),
-      })
+      }),
     );
   });
 });
@@ -126,7 +128,7 @@ describe("Book Schedule Controller", () => {
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "Booked successfully",
-      })
+      }),
     );
   });
 });
@@ -164,7 +166,7 @@ describe("Delete Schedule controller", () => {
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "Delete Successful",
-      })
+      }),
     );
   });
 });
