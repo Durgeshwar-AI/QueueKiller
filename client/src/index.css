@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
-@utility bg-primary {
-    background : rgba(1,1,1,0.3)
+@layer base{
+    button {
+        cursor: pointer;
+    }
+    button:hover{
+        transform: scale(1.1);
+        transition: 0.5s;
+    }
 }
