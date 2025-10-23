@@ -121,12 +121,8 @@ export const deleteSchedule = async (
     }
 
     const currentSchedule = scheduleDoc.schedules.find((s) => s.id === id);
-    if (!currentSchedule) {
-      res.status(204).json({ message: "Schedule not found" });
-      return;
-    }
 
-    if (currentSchedule.booked) {
+    if (currentSchedule?.booked) {
       res
         .status(400)
         .json({ message: "Schedule is already booked and cannot be deleted" });

@@ -1,3 +1,11 @@
+import {
+  bookSchedule,
+  createSchedule,
+  deleteSchedule,
+  getSchedule,
+} from "../../controllers/schedule.controller";
+import Schedule from "../../models/schedule.model";
+
 // mock the Schedule model before importing the controller so imports receive the mock
 jest.mock("../../models/schedule.model", () => ({
   default: {
@@ -6,16 +14,6 @@ jest.mock("../../models/schedule.model", () => ({
     deleteOne: jest.fn(),
   },
 }));
-
-// also mock the compiled JS path (some runners import .js paths)
-
-import {
-  bookSchedule,
-  createSchedule,
-  deleteSchedule,
-  getSchedule,
-} from "../../controllers/schedule.controller";
-import Schedule from "../../models/schedule.model";
 
 // ensure the imported Schedule has jest mock functions (some runners return real module)
 const MockSchedule = Schedule as unknown as any;
@@ -39,7 +37,7 @@ describe("createSchedule controller", () => {
     });
 
     const req = {
-      body: { date: "2024-10-10", start: "10:00", end: "11:00" },
+      body: { company: "ABC", date: "2024-10-10", start: "10:00", end: "11:00" },
     } as unknown as any;
 
     const res = {
@@ -64,7 +62,7 @@ describe("createSchedule controller", () => {
 describe("Get Schedule controller", () => {
   test("getSchedule to get all the schedules", async () => {
     const req = {
-      params: { company: "ABC", department: "General", date: "2024-10-10" },
+      query: { company: "ABC", department: "General", date: "2024-10-10" },
     } as unknown as any;
     const res = {
       status: jest.fn().mockReturnThis(),
