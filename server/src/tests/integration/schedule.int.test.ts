@@ -1,10 +1,12 @@
 // src/tests/integration/schedule.int.test.ts
+process.env.NODE_ENV = "test";
+
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import request from "supertest";
 import Schedule from "../../models/schedule.model";
 import app from "../../app";
-import { connectRedis } from "../../utils/redis";
+import { connectRedis, stopRedis } from "../../utils/redis";
 import { fillBucket } from "../../middlewares/rateLimiter";
 
 const BASE = process.env.TEST_BASE_PATH || "/api/schedule";
@@ -39,10 +41,8 @@ describe("Schedule integration tests", () => {
   afterAll(async () => {
     // 5️⃣ Disconnect MongoDB
     await mongoose.disconnect();
+    await stopRedis();
     if (mongoServer) await mongoServer.stop();
-
-    // 6️⃣ Disconnect Redis
-    if (redisClient) await redisClient.quit();
   });
 
   // -------------------
