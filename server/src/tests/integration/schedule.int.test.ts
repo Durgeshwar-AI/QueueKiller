@@ -3,6 +3,8 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import request from "supertest";
 import Schedule from "../../models/schedule.model";
 import app from "../../app";
+import { connectRedis } from "../../utils/redis";
+import { fillBucket } from "../../middlewares/rateLimiter";
 
 const BASE = process.env.TEST_BASE_PATH || "/api/schedule"; // adjust if needed
 
@@ -11,6 +13,8 @@ describe("Schedule integration tests", () => {
 
   beforeAll(async () => {
     // 1️⃣ Start in-memory MongoDB server
+    await connectRedis();
+    await fillBucket();
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
     process.env.MONGO_URI = uri;

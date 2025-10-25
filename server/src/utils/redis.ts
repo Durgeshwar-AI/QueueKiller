@@ -1,26 +1,33 @@
-import { createClient } from "redis";
+import { config } from "dotenv";
+import { createClient, RedisClientType } from "redis";
+import { RedisMemoryServer } from "redis-memory-server";
 
-const client = createClient({
-  url: "redis://localhost:6379",
-});
+config();
 
-client.on("error", (err) => console.log("Redis Client Error", err));
+let client: RedisClientType;
+let redisServer: RedisMemoryServer;
+const isTest = process.env.NODE_ENV === "test";
 
-export async function connectRedis() {
-  if (!client.isOpen) {
+export async function connectRedis(): Promise<RedisClientType> {
+  if (!client) {
+    if (isTest) {
+      if (!redisServer) redisServer = await RedisMemoryServer.create();
+      const port = await redisServer.getPort();
+      const uri = `redis://localhost:${port}`;
+      client = createClient({ url: uri });
+    } else {
+      client = createClient({ url: process.env.REDIS_URL });
+    }
+
     await client.connect();
-    console.log("Redis connected");
+    client.on("error", (err) => console.log("Redis Client Error", err));
+
+    console.log(isTest ? "In-memory Redis connected" : "Redis connected");
   }
   return client;
 }
 
-export default client;
-
-// Graceful shutdown helpers
-process.on("SIGINT", async () => {
-  try {
-    if (client.isOpen) await client.disconnect();
-  } finally {
-    process.exit(0);
-  }
-});
+export async function stopRedis() {
+  if (client?.isOpen) await client.disconnect();
+  if (redisServer) await redisServer.stop();
+}
