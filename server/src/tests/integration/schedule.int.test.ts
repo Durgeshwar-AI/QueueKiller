@@ -1,3 +1,4 @@
+// src/tests/integration/schedule.int.test.ts
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import request from "supertest";
@@ -6,39 +7,54 @@ import app from "../../app";
 import { connectRedis } from "../../utils/redis";
 import { fillBucket } from "../../middlewares/rateLimiter";
 
-const BASE = process.env.TEST_BASE_PATH || "/api/schedule"; // adjust if needed
+const BASE = process.env.TEST_BASE_PATH || "/api/schedule";
 
 describe("Schedule integration tests", () => {
-  let mongoServer: MongoMemoryServer;
+  let mongoServer: MongoMemoryServer | undefined;
+  let redisClient: any;
 
+  // -------------------
+  // Setup
+  // -------------------
   beforeAll(async () => {
-    // 1️⃣ Start in-memory MongoDB server
-    await connectRedis();
+    // 1️⃣ Start Redis (or mock if you want)
+    redisClient = await connectRedis();
     await fillBucket();
+
+    // 2️⃣ Start in-memory MongoDB
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
-    process.env.MONGO_URI = uri;
+    process.env.MONGO_URI = uri; // ensure your app uses this URI
 
-    // 2️⃣ Disconnect if an existing connection is active
-    if (mongoose.connection.readyState !== 0) {
-      await mongoose.disconnect();
-    }
+    // 3️⃣ Disconnect if already connected
+    if (mongoose.connection.readyState !== 0) await mongoose.disconnect();
 
-    // 3️⃣ Connect to the in-memory test DB
+    // 4️⃣ Connect to in-memory DB
     await mongoose.connect(uri, { dbName: "test" });
   });
 
+  // -------------------
+  // Teardown
+  // -------------------
   afterAll(async () => {
-    // 4️⃣ Cleanly disconnect & stop the in-memory DB
+    // 5️⃣ Disconnect MongoDB
     await mongoose.disconnect();
-    await mongoServer.stop();
+    if (mongoServer) await mongoServer.stop();
+
+    // 6️⃣ Disconnect Redis
+    if (redisClient) await redisClient.quit();
   });
 
+  // -------------------
+  // Cleanup before each test
+  // -------------------
   beforeEach(async () => {
-    // 5️⃣ Clear all documents before each test
     await Schedule.deleteMany({});
   });
 
+  // -------------------
+  // Integration tests
+  // -------------------
   test("create -> get -> book -> delete flow", async () => {
     const company = "acme";
     const department = "sales";
@@ -46,14 +62,14 @@ describe("Schedule integration tests", () => {
     const start = "09:00";
     const end = "10:00";
 
-    // Create schedule (no existing doc → 201)
+    // Create schedule
     const createRes = await request(app)
       .post(`${BASE}/create`)
       .send({ company, department, date, start, end })
       .expect(201);
     expect(createRes.body.message).toBe("Schedule created successfully");
 
-    // Fetch schedule (200)
+    // Fetch schedule
     const getRes = await request(app)
       .get(`${BASE}`)
       .query({ company, department, date })
@@ -64,13 +80,13 @@ describe("Schedule integration tests", () => {
     expect(slot.start).toBe(start);
     expect(slot.end).toBe(end);
 
-    // Read parent doc to get schedulesId
+    // Get parent doc
     const doc = await Schedule.findOne({ company, department, date }).lean();
     expect(doc).toBeTruthy();
     const schedulesId = (doc! as any)._id.toString();
     const slotId = (doc! as any).schedules[0].id;
 
-    // Book the slot (200)
+    // Book the slot
     const cid = new mongoose.Types.ObjectId().toHexString();
     const bookRes = await request(app)
       .put(`${BASE}/book`)
@@ -78,7 +94,7 @@ describe("Schedule integration tests", () => {
       .expect(200);
     expect(bookRes.body.message).toBe("Booked successfully");
 
-    // Booking again should fail (400)
+    // Booking again should fail
     await request(app)
       .put(`${BASE}/book`)
       .send({
@@ -88,14 +104,14 @@ describe("Schedule integration tests", () => {
       })
       .expect(400);
 
-    // Delete booked slot → should be rejected (400)
+    // Delete booked slot -> should fail
     await request(app).delete(`${BASE}/delete/${slotId}`).expect(400);
 
-    // Create another slot then delete it when unbooked
+    // Create another slot and delete when unbooked
     const createRes2 = await request(app)
       .post(`${BASE}/create`)
       .send({ company, department, date, start: "10:00", end: "11:00" })
-      .expect(200); // updated existing doc
+      .expect(200);
     expect(createRes2.body.message).toBe("Schedule updated successfully");
 
     const doc2 = await Schedule.findOne({ company, department, date }).lean();
