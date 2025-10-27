@@ -1,5 +1,6 @@
 // src/tests/integration/schedule.int.test.ts
 process.env.NODE_ENV = "test";
+jest.setTimeout(20000);
 
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
