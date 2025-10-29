@@ -3,6 +3,8 @@ import CreateSchedule from "../components/company/CreateSchedule";
 import EditSchedule from "../components/company/EditSchedule";
 import axios from "axios";
 
+const URL = import.meta.env.VITE_API_URL
+
 const Scheduler = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +13,7 @@ const Scheduler = () => {
   const fetchData = async (date: string) => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:8000/api/schedule/", {
+      const res = await axios.get(`${URL}/schedule/`, {
         params: {
           date,
         },

@@ -2,6 +2,8 @@ import axios from "axios";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
+const URL = import.meta.env.VITE_API_URL
+
 interface Schedule {
   id: string;
   start: string;
@@ -28,7 +30,7 @@ const EditSchedule = ({
 
   const deleteSchedule = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:8000/api/schedule/delete/${id}`);
+      await axios.delete(`${URL}/schedule/delete/${id}`);
       refresh(date);
     } catch (err: unknown) {
       console.log(err);

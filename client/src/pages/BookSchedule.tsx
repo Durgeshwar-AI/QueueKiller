@@ -8,6 +8,8 @@ interface Schedule {
   booked: boolean;
 }
 
+const URL = import.meta.env.VITE_API_URL
+
 const getISODate = (d = new Date()) => d.toISOString().split("T")[0];
 
 const BookSchedule = () => {
@@ -21,7 +23,7 @@ const BookSchedule = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.get("http://localhost:8000/api/schedule/", {
+      const res = await axios.get(`${URL}/schedule/`, {
         params: {
           date,
         },
@@ -58,7 +60,7 @@ const BookSchedule = () => {
   const book = async (id: string) => {
     try {
       setBookingId(id);
-      const res = await axios.put("http://localhost:8000/api/schedule/book", {
+      const res = await axios.put(`${URL}/schedule/book`, {
         date: date,
         id: id,
         cid: "66f4d8e9c2c7a2f8b4d3c123",

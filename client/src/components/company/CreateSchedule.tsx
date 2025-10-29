@@ -1,6 +1,8 @@
 import axios from "axios";
 import React, { useState } from "react";
 
+const URL = import.meta.env.VITE_API_URL
+
 const CreateSchedule = ({ onCreated }: { onCreated: () => void }) => {
   const [start, setStart] = useState<string>("");
   const [end, setEnd] = useState<string>("");
@@ -24,7 +26,7 @@ const CreateSchedule = ({ onCreated }: { onCreated: () => void }) => {
 
     try {
       const res = await axios.post(
-        "http://localhost:8000/api/schedule/create",
+        `${URL}/schedule/create`,
         {
           date,
           start,
