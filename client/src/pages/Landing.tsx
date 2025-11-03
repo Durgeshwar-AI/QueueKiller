@@ -1,5 +1,8 @@
+import { Footer } from '../components/Footer'
 import Hero from '../components/Landing/Hero'
+import JoinUs from '../components/Landing/JoinUs'
 import Services from '../components/Landing/Services'
+import Trust from '../components/Landing/Trust'
 import Navbar from '../components/Navbar'
 
 const Landing = () => {
@@ -8,6 +11,9 @@ const Landing = () => {
         <Navbar/>
         <Hero/>
         <Services/>
+        <Trust/>
+        <JoinUs/>
+        <Footer/>
     </div>
   )
 }
