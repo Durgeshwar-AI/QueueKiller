@@ -14,7 +14,7 @@ export function Footer() {
           {/* Company Info */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-primary to-indigo-600 rounded-xl">
+              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <span className="text-white tracking-tight text-lg font-medium">ScheduleBook</span>
