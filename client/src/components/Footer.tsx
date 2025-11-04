@@ -1,13 +1,11 @@
 import { Calendar, Mail, MapPin, Phone, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-interface FooterProps {
-  onNavigate?: (page: string) => void;
-  isAuthenticated?: boolean;
-}
-
-export function Footer({ onNavigate, isAuthenticated }: FooterProps) {
+export function Footer() {
+    const [isAuthenticated] = useState(false);
     const navigate = useNavigate();
+
   return (
     <footer className="bg-gray-900 text-gray-300 border-t border-gray-800 w-full">
       {/* Main Footer */}
