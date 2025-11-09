@@ -4,6 +4,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import { config } from "dotenv";
 import scheduleRoutes from "./routes/schedule.route";
+import authRoutes from "./routes/auth.route";
 import rateLimitMiddleware from "./middlewares/rateLimiter";
 import mongoSanitize from "express-mongo-sanitize";
 
@@ -26,5 +27,6 @@ app.use(morgan("dev"));
 app.use(rateLimitMiddleware);
 
 app.use("/api/schedule", scheduleRoutes);
+app.use("/api/auth", authRoutes);
 
 export default app;
