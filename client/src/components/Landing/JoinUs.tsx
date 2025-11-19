@@ -1,9 +1,11 @@
 import { ArrowRight } from "lucide-react";
+import { useAppSelector } from "../../hooks/reduxHooks";
 
 function JoinUs() {
+  const {isLoggedIn} = useAppSelector((s) => s.auth);
   return (
     <div className="bg-[#5045E8] flex flex-col text-white w-full justify-center items-center">
-      <div className="flex flex-col items-center text-center gap-8 py-32">
+      {(!isLoggedIn) && (<div className="flex flex-col items-center text-center gap-8 py-32">
         {/* Heading */}
         <p className="font-semibold text-lg">Ready to Get Started?</p>
 
@@ -18,7 +20,7 @@ function JoinUs() {
           Create Your Account
           <ArrowRight className="w-5 h-5" />
         </button>
-      </div>
+      </div>)}
 
       <hr className="w-full text-black bg-black" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-16 px-6 w-full">

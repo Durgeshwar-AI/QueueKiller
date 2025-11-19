@@ -26,7 +26,6 @@ const Signup = () => {
     dispatch(signup({ name, email, password }))
       .unwrap()
       .then(() => {
-        // On success, navigate to dashboard or home
         navigate("/");
       })
       .catch((err: unknown) => {

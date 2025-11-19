@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
 
 export interface IauthState {
   role: string;
@@ -19,34 +20,59 @@ const initialState: IauthState = {
 type SignupPayload = { name: string; email: string; password: string };
 type LoginPayload = { email: string; password: string };
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 
 export const signup = createAsyncThunk(
   "auth/signup",
-  async (data: SignupPayload, { rejectWithValue }) => {
+  async (data: SignupPayload, { dispatch, rejectWithValue }) => {
     const res = await fetch(`${API_BASE}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
+
     const json = await res.json();
-    if (!res.ok)
-      return rejectWithValue(json?.message || json || "Signup failed");
+
+    if (!res.ok) {
+      return rejectWithValue(json?.message || "Signup failed");
+    }
+
+    // LOGIN AUTOMATICALLY AFTER SIGNUP
+    dispatch(
+      login({
+        token: json.token,
+        name: json.user.name,
+        role: json.user.role,
+      })
+    );
+
     return json;
   }
 );
 
 export const loginUser = createAsyncThunk(
   "auth/login",
-  async (data: LoginPayload, { rejectWithValue }) => {
+  async (data: LoginPayload, { dispatch, rejectWithValue }) => {
     const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
+
     const json = await res.json();
-    if (!res.ok)
-      return rejectWithValue(json?.message || json || "Login failed");
+
+    if (!res.ok) {
+      return rejectWithValue(json?.message || "Login failed");
+    }
+
+    dispatch(
+      login({
+        token: json.token,
+        name: json.user.name,
+        role: json.user.role,
+      })
+    );
+
     return json;
   }
 );
@@ -63,49 +89,21 @@ const authSlice = createSlice({
       state.error = null;
       localStorage.removeItem("token");
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(signup.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(signup.fulfilled, (state, action) => {
-        state.loading = false;
-        // server may return token and user info
-        const user = action.payload?.user || action.payload?.data || {};
-        state.role = user.role || "";
-        state.name = user.name || user.email || "";
-        state.isLoggedIn = true;
-        if (action.payload?.token)
-          localStorage.setItem("token", action.payload.token);
-      })
-      .addCase(signup.rejected, (state, action) => {
-        state.loading = false;
-        state.error =
-          (action.payload as string) || action.error.message || "Signup failed";
-      })
-      .addCase(loginUser.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(loginUser.fulfilled, (state, action) => {
-        state.loading = false;
-        const user = action.payload?.user || action.payload?.data || {};
-        state.role = user.role || "";
-        state.name = user.name || user.email || "";
-        state.isLoggedIn = true;
-        if (action.payload?.token)
-          localStorage.setItem("token", action.payload.token);
-      })
-      .addCase(loginUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error =
-          (action.payload as string) || action.error.message || "Login failed";
-      });
+
+    login: (
+      state,
+      action: PayloadAction<{ token?: string; name: string; role: string }>
+    ) => {
+      state.isLoggedIn = true;
+      state.role = action.payload.role;
+      state.name = action.payload.name;
+
+      if (action.payload.token) {
+        localStorage.setItem("token", action.payload.token);
+      }
+    },
   },
 });
 
-export const { logout } = authSlice.actions;
-
+export const { logout, login } = authSlice.actions;
 export default authSlice.reducer;

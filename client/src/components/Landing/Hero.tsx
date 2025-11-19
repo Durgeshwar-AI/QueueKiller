@@ -1,9 +1,11 @@
 import { ArrowRight, CheckCircle, Sparkles, Star } from "lucide-react";
 import { motion } from "motion/react"
 import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../hooks/reduxHooks";
 
 const Hero = () => {
   const navigate = useNavigate();
+  const {isLoggedIn} = useAppSelector((s) => s.auth);
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50 pt-16 md:pt-8">
@@ -34,7 +36,7 @@ const Hero = () => {
                 Whether you're booking a consultation or managing availability, we've got you covered.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4">
+              {!isLoggedIn && (<div className="flex flex-col sm:flex-row gap-4">
                 <button 
                   onClick={() => navigate('signup')}
                   className="group flex text-white bg-gradient-to-r from-[#4746e7] to-indigo-600 hover:from-[#4746e7]/90 hover:to-indigo-600/90 p-2 rounded-xl items-center justify-center"
@@ -48,7 +50,7 @@ const Hero = () => {
                 >
                   Company Login
                 </button>
-              </div>
+              </div>)}
 
               <div className="flex items-center gap-6 mt-8 pt-8 border-t border-border">
                 <div className="flex items-center gap-2">
