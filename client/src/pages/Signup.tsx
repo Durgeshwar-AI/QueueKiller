@@ -37,7 +37,7 @@ const Signup = () => {
   return (
     <>
       <Navbar />
-      <div className="w-screen pt-[100px] py-12 bg-gray-200 flex justify-center items-center">
+      <div className="w-screen pt-[100px] py-24 bg-gray-200 flex justify-center items-center">
         <div className="w-full max-w-md bg-white p-8 rounded-2xl">
           <div className="text-center mb-8">
             <h1 className="mb-2 text-3xl font-bold">Create Account</h1>
@@ -54,7 +54,7 @@ const Signup = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="bg-gray-100 p-4 py-2 rounded-lg"
+                className="bg-white p-4 py-2 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
@@ -67,7 +67,7 @@ const Signup = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-gray-100 p-4 py-2 rounded-lg"
+                className="bg-white p-4 py-2 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
@@ -80,7 +80,7 @@ const Signup = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-gray-100 p-4 py-2 rounded-lg"
+                className="bg-white p-4 py-2 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
@@ -93,13 +93,13 @@ const Signup = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="bg-gray-100 p-4 py-2 rounded-lg"
+                className="bg-white p-4 py-2 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-black text-white p-2 rounded-lg"
+              className="w-full bg-blue-500 text-white p-2 rounded-lg"
               disabled={loading}
             >
               {loading ? "Creating..." : "Sign Up"}
@@ -114,15 +114,15 @@ const Signup = () => {
               Already have an account?{" "}
               <button
                 onClick={() => navigate("/login")}
-                className="text-primary hover:underline"
+                className="text-blue-500 hover:underline"
               >
-                Sign in
+                Login
               </button>
             </p>
             <p className="text-muted-foreground">
               <button
                 onClick={() => navigate("/company-login")}
-                className="text-primary hover:underline"
+                className="text-blue-500 hover:underline"
               >
                 Company Login
               </button>

@@ -22,7 +22,7 @@ const Navbar = () => {
       {/* Right side buttons */}
       {!isLoggedIn ? (
         <div className="flex gap-4 justify-center items-center">
-          <Link to="/signup">
+          <Link to="/login">
             <span className="font-semibold hover:bg-indigo-100 duration-150 hover:text-indigo-500 p-2 px-8 rounded-xl cursor-pointer">
               SignIn
             </span>
