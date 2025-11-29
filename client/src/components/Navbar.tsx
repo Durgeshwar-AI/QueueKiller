@@ -1,13 +1,21 @@
-import { Calendar } from "lucide-react";
+import { Building2, Calendar, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../hooks/reduxHooks";
 import { useEffect } from "react";
+import { ArrowRight } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { logout } from "../redux/auth/authSlice";
 
 const Navbar = () => {
   const { isLoggedIn } = useAppSelector((s) => s.auth);
+
+  const dispatch = useDispatch();
+
   useEffect(() => {
     console.log("Navbar - isLoggedIn:", isLoggedIn);
   }, [isLoggedIn]);
+
+  const currentPath = location.pathname
 
   return (
     <div className="flex justify-between w-full items-center p-4 shadow-md">
@@ -34,13 +42,21 @@ const Navbar = () => {
             </button>
           </Link>
         </div>
-      ):(
-        <div>
-          <Link to="/book">
-            <button className="group flex text-white bg-gradient-to-r from-[#4746e7] to-indigo-600 hover:from-[#4746e7]/90 hover:to-indigo-600/90 p-2 px-6 rounded-xl items-center justify-center">
-              Book Appointment
+      ) : (
+        <div className="flex gap-4">
+          <Link to="book">
+            <button className={`group flex text-black bg-gradient-to-r ${currentPath === "/book" ? "from-[#4746e7] to-indigo-600 text-white" : ""} hover:from-[#4746e7]/90 hover:to-indigo-600/90 hover:text-white p-2 px-6 rounded-xl items-center justify-center`}>
+              <Building2 className="w-6 h-6"/> Departments
             </button>
           </Link>
+          <Link to="profile">
+            <button className={`group flex text-black bg-gradient-to-r ${currentPath === "/profile" ? "from-[#4746e7] to-indigo-600 text-white" : ""} hover:from-[#4746e7]/90 hover:to-indigo-600/90 hover:text-white p-2 px-6 rounded-xl items-center justify-center`}>
+              <User className="w-6 h-6"/> Profile
+            </button>
+          </Link>
+          <button className="group flex text-black hover:text-white bg-gradient-to-r hover:from-[#e74647]/90 hover:to-red-600/90 p-2 px-6 rounded-xl items-center justify-center transition-all duration-150" onClick={() => dispatch(logout())}>
+            <ArrowRight /> Logout
+          </button>
         </div>
       )}
     </div>
