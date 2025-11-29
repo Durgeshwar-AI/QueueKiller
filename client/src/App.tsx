@@ -7,6 +7,7 @@ import Signup from "./pages/Signup";
 import { useEffect } from "react";
 import { useAppDispatch } from "./hooks/reduxHooks";
 import { login } from "./redux/auth/authSlice";
+import Departments from "./pages/Departments";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -21,6 +22,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Landing />}/>
         <Route path="/book" element={<BookSchedule />}/>
+        <Route path="/department" element={<Departments />}/>
         <Route path="/schedule" element={<Scheduler/>}/>
         <Route path="/login" element={<Login/>}/>
         <Route path="/signup" element={<Signup/>}/>
