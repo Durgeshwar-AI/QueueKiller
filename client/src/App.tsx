@@ -4,8 +4,18 @@ import Scheduler from "./pages/Scheduler";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import { useEffect } from "react";
+import { useAppDispatch } from "./hooks/reduxHooks";
+import { login } from "./redux/auth/authSlice";
 
 const App = () => {
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      dispatch(login({ token, name: localStorage.getItem("name") || "", role: localStorage.getItem("role") || "user" }));
+    }
+  }, [dispatch]);
   return (
     <div className="flex flex-col min-h-screen relative">
       <Routes>

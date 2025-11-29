@@ -87,7 +87,7 @@ const authSlice = createSlice({
       state.isLoggedIn = false;
       state.loading = false;
       state.error = null;
-      localStorage.removeItem("token");
+      localStorage.clear();
     },
 
     login: (
@@ -100,6 +100,8 @@ const authSlice = createSlice({
 
       if (action.payload.token) {
         localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("name", action.payload.name);
+        localStorage.setItem("role", action.payload.role);
       }
     },
   },
