@@ -20,12 +20,14 @@ const Navbar = () => {
   return (
     <div className="flex justify-between w-full items-center p-4 shadow-md">
       {/* Logo */}
-      <div className="text-lg flex gap-2 justify-center items-center">
-        <span className="bg-indigo-600 text-white p-2 rounded-xl">
-          <Calendar />
-        </span>
-        <span className="text-xl font-semibold">QueueKiller</span>
-      </div>
+      <Link to='/'>
+        <div className="text-lg flex gap-2 justify-center items-center cursor-pointer">
+          <span className="bg-indigo-600 text-white p-2 rounded-xl">
+            <Calendar />
+          </span>
+          <span className="text-xl font-semibold">QueueKiller</span>
+        </div>
+      </Link>
 
       {/* Right side buttons */}
       {!isLoggedIn ? (
@@ -44,18 +46,18 @@ const Navbar = () => {
         </div>
       ) : (
         <div className="flex gap-4">
-          <Link to="book">
-            <button className={`group flex text-black bg-gradient-to-r ${currentPath === "/book" ? "from-[#4746e7] to-indigo-600 text-white" : ""} hover:from-[#4746e7]/90 hover:to-indigo-600/90 hover:text-white p-2 px-6 rounded-xl items-center justify-center`}>
-              <Building2 className="w-6 h-6"/> Departments
+          <Link to="department">
+            <button className={`group flex text-black bg-gradient-to-r ${currentPath === "/book" ? "from-[#4746e7] to-indigo-600 text-white" : ""} hover:from-[#4746e7]/90 hover:to-indigo-600/90 hover:text-white p-2 px-6 rounded-xl items-center justify-center gap-2`}>
+              <Building2 className="w-6 h-6"/><span>Departments</span>
             </button>
           </Link>
           <Link to="profile">
-            <button className={`group flex text-black bg-gradient-to-r ${currentPath === "/profile" ? "from-[#4746e7] to-indigo-600 text-white" : ""} hover:from-[#4746e7]/90 hover:to-indigo-600/90 hover:text-white p-2 px-6 rounded-xl items-center justify-center`}>
-              <User className="w-6 h-6"/> Profile
+            <button className={`group flex text-black bg-gradient-to-r ${currentPath === "/profile" ? "from-[#4746e7] to-indigo-600 text-white" : ""} hover:from-[#4746e7]/90 hover:to-indigo-600/90 hover:text-white p-2 px-6 rounded-xl items-center justify-center gap-2`}>
+              <User className="w-6 h-6"/><span>Profile</span>
             </button>
           </Link>
-          <button className="group flex text-black hover:text-white bg-gradient-to-r hover:from-[#e74647]/90 hover:to-red-600/90 p-2 px-6 rounded-xl items-center justify-center transition-all duration-150" onClick={() => dispatch(logout())}>
-            <ArrowRight /> Logout
+          <button className="group flex text-black hover:text-white bg-gradient-to-r hover:from-[#e74647]/90 hover:to-red-600/90 p-2 px-6 rounded-xl items-center justify-center gap-2 transition-all duration-150" onClick={() => dispatch(logout())}>
+            <ArrowRight /><span>Logout</span>
           </button>
         </div>
       )}
