@@ -20,7 +20,7 @@ const initialState: IauthState = {
 type SignupPayload = { name: string; email: string; password: string };
 type LoginPayload = { email: string; password: string };
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
+const API_BASE = process.env.API_URL || "http://localhost:8000/api";
 
 export const signup = createAsyncThunk(
   "auth/signup",

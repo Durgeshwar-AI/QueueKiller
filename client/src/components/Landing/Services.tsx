@@ -30,9 +30,9 @@ const Services = () => {
         <h2 className="font-semibold text-2xl mb-6">Everything You Need</h2>
         <p className="text-gray-400 mb-6 text-lg">Powerful features to streamline your appointment scheduling experience</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-6 gap-4">
-            {service.map((service)=>{
+            {service.map((service, idx)=>{
               return (
-                <div className="flex flex-col gap-8 bg-white outline-[0.5px] outline-gray-100 rounded-2xl p-8">
+                <div key={idx} className="flex flex-col gap-8 bg-white outline-[0.5px] outline-gray-100 rounded-2xl p-8">
                   <span className={`p-4 ${service.background} ${service.text} max-w-[max-content] rounded-2xl`}>{service.logo}</span>
                   <div className="text-lg font-semibold">{service.title}</div>
                   <div className="text-gray-400">{service.description}</div>

@@ -1,13 +1,18 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { Provider } from "react-redux";
+import { store } from "../redux/store";
+import Login from "../pages/Login";
 
-test("renders Login placeholder heading", () => {
-  const Login = () => (
-    <div>
-      <h1>Login</h1>
-    </div>
+test("renders Login heading", () => {
+  render(
+    <Provider store={store}>
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    </Provider>
   );
-  render(React.createElement(Login, null));
-  const heading = screen.getByText("Login");
+
+  const heading = screen.getByRole("heading", { name: /login/i });
   expect(heading).toBeInTheDocument();
 });

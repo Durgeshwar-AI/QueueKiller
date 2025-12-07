@@ -27,9 +27,9 @@ const Hero = () => {
                 <span className="text-[#4746e7]">Your Smart Scheduling Solution</span>
               </div>
               
-              <h1 className="mb-6 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+              <h2 className="mb-6 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
                 Book Appointments with Ease
-              </h1>
+              </h2>
               
               <p className="text-muted-foreground mb-8 max-w-lg text-[#7e7e7e]">
                 Connect with departments across multiple companies and schedule appointments seamlessly. 

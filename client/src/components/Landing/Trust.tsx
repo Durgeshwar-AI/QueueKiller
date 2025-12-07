@@ -1,10 +1,8 @@
-import React from "react";
-
 const Trust = () => {
   return (
     <div className="w-full min-h-screen grid grid-cols-1 md:grid-cols-2 gap-4 p-8">
       <div className="flex flex-col justify-center p-4">
-        <h1 className="text-2xl font-semibold mb-6">Trusted By Thousands</h1>
+        <h2 className="text-2xl font-semibold mb-6">Trusted By Thousands</h2>
         <p className="text-gray-400 text-lg mb-6">
           Join thousands of professionals who use ScheduleBook to manage their
           appointments efficiently.
