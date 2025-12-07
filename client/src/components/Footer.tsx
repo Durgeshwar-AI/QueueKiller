@@ -1,10 +1,38 @@
-import { Calendar, Mail, MapPin, Phone, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {
+  Calendar,
+  Mail,
+  MapPin,
+  Phone,
+  Facebook,
+  Twitter,
+  Linkedin,
+  Instagram,
+} from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+const Icons = [
+  {
+    icon: Facebook,
+    color: "blue",
+  },
+  {
+    icon: Twitter,
+    color: "black",
+  },
+  {
+    icon: Linkedin,
+    color: "darkblue",
+  },
+  {
+    icon: Instagram,
+    color: "red",
+  },
+];
 
 export function Footer() {
-    const [isAuthenticated] = useState(false);
-    const navigate = useNavigate();
+  const [isAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <footer className="bg-gray-900 text-gray-300 border-t border-gray-800 w-full">
@@ -17,20 +45,30 @@ export function Footer() {
               <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
-              <span className="text-white tracking-tight text-lg font-medium">ScheduleBook</span>
+              <span className="text-white tracking-tight text-lg font-medium">
+                ScheduleBook
+              </span>
             </div>
             <p className="text-gray-400 mb-4">
-              Your trusted platform for seamless appointment scheduling across multiple
-              departments and companies.
+              Your trusted platform for seamless appointment scheduling across
+              multiple departments and companies.
             </p>
             <div className="flex gap-3">
-              {[Facebook, Twitter, Linkedin, Instagram].map((Icon, i) => (
+              {Icons.map((icon, i) => (
                 <a
                   key={i}
                   href="#"
-                  className="w-9 h-9 bg-gray-800 hover:bg-primary rounded-lg flex items-center justify-center transition-colors"
+                  className="w-9 h-9 bg-gray-800 hover:bg-primary rounded-lg flex items-center justify-center transition-colors group"
+                  onMouseEnter={(e) => {
+                    const iconElement = e.currentTarget.querySelector("svg");
+                    if (iconElement) iconElement.style.color = icon.color;
+                  }}
+                  onMouseLeave={(e) => {
+                    const iconElement = e.currentTarget.querySelector("svg");
+                    if (iconElement) iconElement.style.color = "";
+                  }}
                 >
-                  <Icon className="w-4 h-4" />
+                  <icon.icon className="w-4 h-4 transition-colors" />
                 </a>
               ))}
             </div>
@@ -44,8 +82,8 @@ export function Footer() {
                 <>
                   <li>
                     <button
-                      onClick={() => navigate('landing')}
-                      className="hover:text-primary transition-colors"
+                      onClick={() => navigate("/")}
+                      className="hover:text-primary transition-colors duration-150 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-400 after:transition-all after:duration-300 hover:after:w-full"
                     >
                       Home
                     </button>
@@ -54,24 +92,24 @@ export function Footer() {
                     <>
                       <li>
                         <button
-                          onClick={() => navigate('signup')}
-                          className="hover:text-primary transition-colors"
+                          onClick={() => navigate("signup")}
+                          className="hover:text-primary transition-colors duration-150 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-400 after:transition-all after:duration-300 hover:after:w-full"
                         >
                           Sign Up
                         </button>
                       </li>
                       <li>
                         <button
-                          onClick={() => navigate('login')}
-                          className="hover:text-primary transition-colors"
+                          onClick={() => navigate("login")}
+                          className="hover:text-primary transition-colors duration-150 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-400 after:transition-all after:duration-300 hover:after:w-full"
                         >
                           Login
                         </button>
                       </li>
                       <li>
                         <button
-                          onClick={() => navigate('company-login')}
-                          className="hover:text-primary transition-colors"
+                          onClick={() => navigate("company-login")}
+                          className="hover:text-primary transition-colors duration-150 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-400 after:transition-all after:duration-300 hover:after:w-full"
                         >
                           Company Portal
                         </button>
@@ -82,16 +120,16 @@ export function Footer() {
                     <>
                       <li>
                         <button
-                          onClick={() => navigate('departments')}
-                          className="hover:text-primary transition-colors"
+                          onClick={() => navigate("departments")}
+                          className="hover:text-primary transition-colors duration-150 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-400 after:transition-all after:duration-300 hover:after:w-full"
                         >
                           Departments
                         </button>
                       </li>
                       <li>
                         <button
-                          onClick={() => navigate('profile')}
-                          className="hover:text-primary transition-colors"
+                          onClick={() => navigate("profile")}
+                          className="hover:text-primary transition-colors duration-150 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-400 after:transition-all after:duration-300 hover:after:w-full"
                         >
                           My Profile
                         </button>
@@ -107,9 +145,18 @@ export function Footer() {
           <div>
             <h4 className="text-white mb-4 font-semibold">Resources</h4>
             <ul className="space-y-3">
-              {['About Us', 'How It Works', 'FAQs', 'Support Center', 'Blog'].map((item, i) => (
+              {[
+                "About Us",
+                "How It Works",
+                "FAQs",
+                "Support Center",
+                "Blog",
+              ].map((item, i) => (
                 <li key={i}>
-                  <a href="#" className="hover:text-primary transition-colors">
+                  <a
+                    href="#"
+                    className="hover:text-primary transition-colors duration-150 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-400 after:transition-all after:duration-300 hover:after:w-full"
+                  >
                     {item}
                   </a>
                 </li>
@@ -131,7 +178,10 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-primary flex-shrink-0" />
-                <a href="tel:+1234567890" className="hover:text-primary transition-colors">
+                <a
+                  href="tel:+1234567890"
+                  className="hover:text-primary transition-colors duration-150 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-400 after:transition-all after:duration-300 hover:after:w-full"
+                >
                   +1 (234) 567-890
                 </a>
               </li>
@@ -139,7 +189,7 @@ export function Footer() {
                 <Mail className="w-5 h-5 text-primary flex-shrink-0" />
                 <a
                   href="mailto:support@schedulebook.com"
-                  className="hover:text-primary transition-colors"
+                  className="hover:text-primary transition-colors duration-150 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-400 after:transition-all after:duration-300 hover:after:w-full"
                 >
                   support@schedulebook.com
                 </a>
@@ -155,11 +205,17 @@ export function Footer() {
               &copy; 2025 ScheduleBook. All rights reserved.
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-gray-400">
-              {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((item, i) => (
-                <a key={i} href="#" className="hover:text-primary transition-colors">
-                  {item}
-                </a>
-              ))}
+              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map(
+                (item, i) => (
+                  <a
+                    key={i}
+                    href="#"
+                    className="hover:text-primary transition-colors duration-150 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-400 after:transition-all after:duration-300 hover:after:w-full"
+                  >
+                    {item}
+                  </a>
+                )
+              )}
             </div>
           </div>
         </div>
