@@ -1,7 +1,16 @@
 @import "tailwindcss";
 
-@layer base{
-    button {
-        cursor: pointer;
-    }
+* {
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body{
+    overflow-x: hidden;
+}
+
+@layer base {
+  button {
+    cursor: pointer;
+  }
 }

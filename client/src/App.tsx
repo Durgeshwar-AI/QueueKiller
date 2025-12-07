@@ -21,7 +21,7 @@ const App = () => {
     <div className="flex flex-col min-h-screen relative">
       <Routes>
         <Route path="/" element={<Landing />}/>
-        <Route path="/book" element={<BookSchedule />}/>
+        <Route path="/book/:id" element={<BookSchedule />}/>
         <Route path="/department" element={<Departments />}/>
         <Route path="/schedule" element={<Scheduler/>}/>
         <Route path="/login" element={<Login/>}/>

@@ -7,8 +7,8 @@ import type { RootState } from "../redux/store";
 import { loginUser } from "../redux/auth/authSlice";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -17,6 +17,7 @@ const Login = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // dispatch login thunk
+    console.log(email, password)
     dispatch(loginUser({ email, password }))
       .unwrap()
       .then(() => {
