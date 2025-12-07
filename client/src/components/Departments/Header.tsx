@@ -1,10 +1,9 @@
 import { Search } from "lucide-react";
-import React from "react";
 
 const Header = () => {
   return (
     <div className="flex justify-center items-center p-4 flex-col gap-2 mt-16 mb-16">
-      <div className="w-full flex flex-col gap-4">
+      <div className="w-full flex flex-col gap-4 justify-center items-center">
         <h1 className="text-3xl font-semibold">Browse Departments</h1>
         <p className="text-gray-600">
           Select a department to view and book your schedule
