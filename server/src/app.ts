@@ -5,6 +5,7 @@ import helmet from "helmet";
 import { config } from "dotenv";
 import scheduleRoutes from "./routes/schedule.route";
 import authRoutes from "./routes/auth.route";
+import departmentsRoutes from "./routes/departments.route";
 import rateLimitMiddleware from "./middlewares/rateLimiter";
 import mongoSanitize from "express-mongo-sanitize";
 
@@ -28,5 +29,6 @@ app.use(rateLimitMiddleware);
 
 app.use("/api/schedule", scheduleRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/departments", departmentsRoutes);
 
 export default app;
