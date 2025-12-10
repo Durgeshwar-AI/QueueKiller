@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 import Schedule, { ISingleSchedule } from "../models/schedule.model";
 import { createScheduleId } from "../services/schedule.service";
 import type { Request, Response } from "express";
+import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 
 export const getSchedule = async (
   req: Request<
@@ -77,10 +78,14 @@ export const createSchedule = async (
 };
 
 export const bookSchedule = async (
-  req: Request<{}, { schedulesId: string; id: string; cid: string }>,
+  req: Request<
+    {},
+    { schedulesId: string; id: string; user: AuthenticatedRequest }
+  >,
   res: Response<{ message?: string; error?: string }>,
 ): Promise<void> => {
-  const { schedulesId, id, cid } = req.body;
+  const { schedulesId, id, user } = req.body;
+  const cid = user._id;
   try {
     const schedule = await Schedule.findOne({ _id: schedulesId });
     const currentSchedule = schedule?.schedules?.find((s) => s.id === id);

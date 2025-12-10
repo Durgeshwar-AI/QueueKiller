@@ -10,7 +10,7 @@ export interface CardProps {
 }
 
 
-const Cards = ({ company, department, description, type, id }: CardProps) => {
+const Cards = ({ company, department, description, type }: CardProps) => {
   return (
     <div className="w-full flex flex-col justify-between gap-4 p-6 border border-gray-200 rounded-xl shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-200 bg-white">
       <div className="flex flex-col gap-4">
@@ -27,7 +27,7 @@ const Cards = ({ company, department, description, type, id }: CardProps) => {
         </div>
         <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
       </div>
-      <Link to={`/book/${id}`}>
+      <Link to={`/book/?name=${company}&dept=${department}`}>
         <button className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
           Apply Now
         </button>

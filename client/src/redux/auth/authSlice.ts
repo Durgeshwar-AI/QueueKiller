@@ -4,6 +4,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 export interface IauthState {
   role: string;
   name: string;
+  token: string;
   isLoggedIn: boolean;
   loading?: boolean;
   error?: string | null;
@@ -12,6 +13,7 @@ export interface IauthState {
 const initialState: IauthState = {
   role: "",
   name: "",
+  token: "",
   isLoggedIn: false,
   loading: false,
   error: null,
@@ -84,6 +86,7 @@ const authSlice = createSlice({
     logout: (state) => {
       state.role = "";
       state.name = "";
+      state.token = "";
       state.isLoggedIn = false;
       state.loading = false;
       state.error = null;
@@ -92,9 +95,10 @@ const authSlice = createSlice({
 
     login: (
       state,
-      action: PayloadAction<{ token?: string; name: string; role: string }>
+      action: PayloadAction<{ token: string; name: string; role: string }>
     ) => {
       state.isLoggedIn = true;
+      state.token = action.payload.token;
       state.role = action.payload.role;
       state.name = action.payload.name;
 
