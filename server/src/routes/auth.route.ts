@@ -13,8 +13,11 @@ import {
   companyRegisterValidation,
 } from "../validators/company.validator";
 import { authenticate } from "../middlewares/auth.middleware";
+import { registerAdmin } from "../controllers/adminAuth.controller";
 
 const router = Router();
+
+router.post("/admin/register", registerValidation, registerAdmin);
 
 router.post("/login", loginValidation, userLogin);
 router.post("/register", registerValidation, registerUser);
