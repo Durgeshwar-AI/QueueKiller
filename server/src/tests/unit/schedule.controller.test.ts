@@ -91,45 +91,52 @@ describe("Get Schedule controller", () => {
 
 describe("Book Schedule Controller", () => {
   test("Testing for booking a schedule by the user", async () => {
-    const req = {
-      body: {
-        date: "2024-10-10",
+  const req = {
+    body: {
+      schedulesId: "507f191e810c19729de860ee",
+      id: "c-001",
+    },
+    user: {
+      _id: "507f191e810c19729de860ea", // <-- FIX HERE
+    },
+  } as unknown as any;
+
+  const res = {
+    status: jest.fn().mockReturnThis(),
+    json: jest.fn(),
+  } as unknown as any;
+
+  const mockScheduleDoc = {
+    date: "2024-10-10",
+    schedules: [
+      {
         id: "c-001",
-        cid: "507f191e810c19729de860ea",
+        start: "10:00",
+        end: "11:00",
+        booked: false,
+        customerId: null,
       },
-    } as unknown as any;
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    } as unknown as any;
-    const mockScheduleDoc = {
-      date: "2024-10-10",
-      schedules: [
-        {
-          id: "c-001",
-          start: "10:00",
-          end: "11:00",
-          booked: false,
-          customerId: null,
-        },
-      ],
-      save: jest.fn().mockResolvedValue(true),
-    };
-    (MockSchedule.findOne as jest.Mock).mockResolvedValue(mockScheduleDoc);
-    try {
-      await bookSchedule(req, res);
-    } catch (err) {
-      console.error("bookSchedule threw", err);
-      throw err;
-    }
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: "Booked successfully",
-      }),
-    );
-  });
+    ],
+    save: jest.fn().mockResolvedValue(true),
+  };
+
+  (MockSchedule.findOne as jest.Mock).mockResolvedValue(mockScheduleDoc);
+
+  await bookSchedule(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(200);
+  expect(res.json).toHaveBeenCalledWith(
+    expect.objectContaining({
+      message: "Booked successfully",
+    }),
+  );
+
+  expect(mockScheduleDoc.schedules[0].booked).toBe(true);
+  expect(mockScheduleDoc.schedules[0].customerId).not.toBeNull();
 });
+
+});
+
 
 describe("Delete Schedule controller", () => {
   test("Testing for deleting a schedule", async () => {

@@ -1,5 +1,4 @@
 // src/tests/integration/schedule.int.test.ts
-process.env.NODE_ENV = "test";
 jest.setTimeout(20000);
 
 import mongoose from "mongoose";
@@ -9,6 +8,7 @@ import Schedule from "../../models/schedule.model";
 import app from "../../app";
 import { connectRedis, stopRedis } from "../../utils/redis";
 import { fillBucket } from "../../middlewares/rateLimiter";
+import jwt from "jsonwebtoken";
 
 const BASE = process.env.TEST_BASE_PATH || "/api/schedule";
 
@@ -34,6 +34,7 @@ describe("Schedule integration tests", () => {
 
     // 4️⃣ Connect to in-memory DB
     await mongoose.connect(uri, { dbName: "test" });
+    jest.resetModules();
   });
 
   // -------------------
@@ -63,6 +64,21 @@ describe("Schedule integration tests", () => {
     const start = "09:00";
     const end = "10:00";
 
+    const cid = new mongoose.Types.ObjectId().toHexString();
+
+    const token = jwt.sign(
+      { _id: cid, email: "abc@abc.abc", role: "user" },
+      process.env.JWT_SECRET || "change-me-in-production",
+      { expiresIn: "1h" },
+    );
+
+    const anotherUserId = new mongoose.Types.ObjectId().toHexString();
+    const anotherToken = jwt.sign(
+      { _id: anotherUserId, email: "different@abc.com", role: "user" },
+      process.env.JWT_SECRET || "change-me-in-production",
+      { expiresIn: "1h" },
+    );
+
     // Create schedule
     const createRes = await request(app)
       .post(`${BASE}/create`)
@@ -88,20 +104,20 @@ describe("Schedule integration tests", () => {
     const slotId = (doc! as any).schedules[0].id;
 
     // Book the slot
-    const cid = new mongoose.Types.ObjectId().toHexString();
     const bookRes = await request(app)
       .put(`${BASE}/book`)
-      .send({ schedulesId, id: slotId, cid })
+      .set("authorization", `Bearer ${token}`)
+      .send({ schedulesId, id: slotId }) // FIXED
       .expect(200);
     expect(bookRes.body.message).toBe("Booked successfully");
 
     // Booking again should fail
     await request(app)
       .put(`${BASE}/book`)
+      .set("authorization", `Bearer ${anotherToken}`)
       .send({
         schedulesId,
-        id: slotId,
-        cid: new mongoose.Types.ObjectId().toHexString(),
+        id: slotId, // FIXED
       })
       .expect(400);
 
@@ -120,6 +136,7 @@ describe("Schedule integration tests", () => {
       (s: any) => s.start === "10:00",
     );
     expect(newSlot).toBeTruthy();
+
     await request(app).delete(`${BASE}/delete/${newSlot.id}`).expect(200);
   });
 

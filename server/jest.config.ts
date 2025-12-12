@@ -190,6 +190,7 @@ const config: Config = {
 
   // Whether to use watchman for file crawling
   // watchman: true,
+  setupFiles: ["<rootDir>/jest.setup.ts"],
 };
 
 export default config;

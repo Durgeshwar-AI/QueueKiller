@@ -78,33 +78,36 @@ export const createSchedule = async (
 };
 
 export const bookSchedule = async (
-  req: Request<
-    {},
-    { schedulesId: string; id: string; user: AuthenticatedRequest }
-  >,
+  req: AuthenticatedRequest &
+    Request<{}, {}, { schedulesId: string; id: string }>,
   res: Response<{ message?: string; error?: string }>,
 ): Promise<void> => {
-  const { schedulesId, id, user } = req.body;
-  const cid = user._id;
+  const { schedulesId, id } = req.body;
+  const cid = req.user?._id;
+
+  if (!cid) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
   try {
     const schedule = await Schedule.findOne({ _id: schedulesId });
     const currentSchedule = schedule?.schedules?.find((s) => s.id === id);
-    if (
-      !schedule ||
-      !schedule.schedules ||
-      schedule.schedules.length === 0 ||
-      !currentSchedule
-    ) {
+
+    if (!schedule || !schedule.schedules || !currentSchedule) {
       res.status(204).json({ error: "No schedules found for this date" });
       return;
     }
+
     if (currentSchedule.booked) {
       res.status(400).json({ message: "Already booked" });
       return;
     }
+
     currentSchedule.booked = true;
     currentSchedule.customerId = Types.ObjectId.createFromHexString(cid);
     await schedule.save();
+
     res.status(200).json({ message: "Booked successfully" });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
