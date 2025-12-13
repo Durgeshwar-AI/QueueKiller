@@ -1,54 +1,48 @@
-import Cards, { type CardProps } from "./Cards";
+import { useEffect, useState } from "react";
+import Cards from "./Cards";
+import axios from "axios";
 
-const departmentsData: CardProps[] = [
-  {
-    id: 1,
-    company: "TechCorp",
-    department: "Engineering",
-    description: "Handles all engineering tasks and product development.",
-    type: "company",
-  },
-  {
-    id: 2,
-    company: "HealthPlus",
-    department: "Emergency",
-    description: "Provides emergency medical services.",
-    type: "hospital",
-  },
-  {
-    id: 3,
-    company: "FinServe",
-    department: "Customer Support",
-    description: "Handles customer inquiries and support services.",
-    type: "company",
-  },
-  {
-    id:4,
-    company: "MediCare",
-    department: "Pediatrics",
-    description: "Provides pediatric medical services.",
-    type: "hospital",
-  },
-  {
-    id:5,
-    company: "RetailHub",
-    department: "Sales",
-    description: "Manages retail sales and customer relations.",
-    type: "company",
-  },
-];
+
+interface departmentProps {
+  companyId: string;
+  companyName: string;
+  department: {
+    _id: string;
+    name: string;
+    type: string;
+  }
+}
+
+const URL = process.env.API_URL;
 
 const AllDepartments = () => {
+  const [departments, setDepartments] = useState<departmentProps[]>([]);
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      console.log(URL);
+      try {
+        const result = await axios.get(`${URL}/api/departments/all`);
+        console.log(result.data.departments)
+        setDepartments(result.data.departments);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchDepartments();
+  }, [URL]);
+
   return (
     <div className="grid grid-cols-3 gap-6 p-8 max-w-[1200px] mx-auto mb-16">
-      {departmentsData.map((dept) => (
+      {departments && departments.map((dept) => (
         <Cards
-          key={dept.id}
-          id={dept.id}
-          company={dept.company}
-          department={dept.department}
-          description={dept.description}
-          type={dept.type}
+          key={dept.department._id}
+          id={dept.department._id}
+          company={dept.companyName}
+          department={dept.department.name}
+          description={dept.department.name}
+          type={dept.department.type}
         />
       ))}
     </div>

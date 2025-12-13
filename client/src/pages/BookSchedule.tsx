@@ -12,8 +12,6 @@ interface Schedule {
   end: string;
   booked: boolean;
 }
-
-// const demoSchedule: Schedule[] = [
 //   {
 //     id: "1",
 //     start: "09:00",
@@ -46,7 +44,7 @@ interface Schedule {
 //   },
 // ];
 
-const URL = import.meta.env.VITE_API_URL;
+const URL = process.env.API_URL;
 
 const getISODate = (d = new Date()) => d.toISOString().split("T")[0];
 
@@ -86,8 +84,6 @@ const BookSchedule = () => {
         a.start.localeCompare(b.start)
       );
       setSchedules(sorted);
-      // Remove this line in production - only for demo
-      // setSchedules(demoSchedule);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 404) {
         setSchedules([]);
