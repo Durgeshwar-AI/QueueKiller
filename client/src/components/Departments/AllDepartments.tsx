@@ -31,7 +31,7 @@ const AllDepartments = () => {
     };
 
     fetchDepartments();
-  }, [URL]);
+  }, []);
 
   return (
     <div className="grid grid-cols-3 gap-6 p-8 max-w-[1200px] mx-auto mb-16">

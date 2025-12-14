@@ -1,8 +1,5 @@
-import axios from "axios";
-import { Trash2 } from "lucide-react";
+import { Trash2, Clock, RefreshCw } from "lucide-react";
 import { useState } from "react";
-
-const URL = import.meta.env.VITE_API_URL
 
 interface Schedule {
   id: string;
@@ -11,37 +8,26 @@ interface Schedule {
   booked: boolean;
 }
 
-const EditSchedule = ({
-  schedules,
-  refresh,
-  loading,
-  error,
-  setError,
-}: {
-  schedules: Schedule[];
-  refresh: (date: string) => void;
-  loading: boolean;
-  error: string | null;
-  setError: (arg0: string | null) => void;
-}) => {
-  const [date, setDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
+const dummySchedules: Schedule[] = [
+  { id: "1", start: "09:00", end: "10:00", booked: false },
+  { id: "2", start: "10:30", end: "11:30", booked: true },
+  { id: "3", start: "12:00", end: "13:00", booked: false },
+  { id: "4", start: "14:00", end: "15:00", booked: true },
+  { id: "5", start: "15:30", end: "16:30", booked: false },
+];
 
-  const deleteSchedule = async (id: string) => {
-    try {
-      await axios.delete(`${URL}/schedule/delete/${id}`);
-      refresh(date);
-    } catch (err: unknown) {
-      console.log(err);
-      if (axios.isAxiosError(err)) {
-        if (err.response?.status === 400)
-          setError("Can't delete a schedule that is already booked!");
-        else setError("Failed to delete schedule. Please try again.");
-      } else {
-        setError("Failed to delete schedule. Please try again.");
-      }
+const EditSchedule = () => {
+  const [schedules, setSchedules] = useState<Schedule[]>(dummySchedules);
+  const [error, setError] = useState<string | null>(null);
+
+  const deleteSchedule = (id: string) => {
+    const schedule = schedules.find((s) => s.id === id);
+    if (schedule?.booked) {
+      setError("Can't delete a schedule that is already booked!");
+      setTimeout(() => setError(null), 3000);
+      return;
     }
+    setSchedules(schedules.filter((s) => s.id !== id));
   };
 
   const formatTime = (time: string) => {
@@ -59,269 +45,132 @@ const EditSchedule = ({
     }
   };
 
-  const handleDateChange = (date: string) => {
-    setDate(date);
-    refresh(date);
-  };
-
+  const availableCount = schedules.filter((s) => !s.booked).length;
+  const bookedCount = schedules.filter((s) => s.booked).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-4xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
-            <svg
-              className="w-8 h-8 text-indigo-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              ></path>
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Edit Schedules
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Manage and delete your scheduled appointments
-          </p>
-
-          {/* Date Selection */}
-          <div className="bg-white rounded-xl p-4 shadow-md border border-gray-200 max-w-md mx-auto">
-            <label
-              htmlFor="date"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Select Date
-            </label>
-            <input
-              type="date"
-              id="date"
-              value={date}
-              onChange={(e) => handleDateChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-            />
-          </div>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center">
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                clipRule="evenodd"
-              ></path>
-            </svg>
-            {error}
-            <button
-              onClick={() => setError(null)}
-              className="ml-auto text-red-500 hover:text-red-700"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                ></path>
-              </svg>
-            </button>
-          </div>
-        )}
-
-        {/* Loading State */}
-        {loading ? (
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-12 text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-indigo-100 rounded-full mb-4">
-              <svg
-                className="animate-spin w-6 h-6 text-indigo-600"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Loading schedules...
-            </h3>
-            <p className="text-gray-600">
-              Please wait while we fetch available time slots
-            </p>
-          </div>
-        ) : (
-          /* Schedules Grid */
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <div className="px-8 py-6">
-              {schedules.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                    <svg
-                      className="w-8 h-8 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      ></path>
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No schedules available
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    There are currently no time slots.
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-8 text-white">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                  <Clock className="w-7 h-7" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold">Today's Schedule</h3>
+                  <p className="text-indigo-100 mt-1">
+                    {schedules.length} time slots available
                   </p>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900">
-                      Scheduled Appointments
-                    </h2>
-                    <button
-                      onClick={() => refresh(date)}
-                      disabled={loading}
-                      className="text-indigo-600 hover:text-indigo-700 font-medium text-sm flex items-center"
-                    >
-                      <svg
-                        className="w-4 h-4 mr-1"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                        ></path>
-                      </svg>
-                      Refresh
-                    </button>
-                  </div>
+              </div>
+              <button
+                onClick={() => setSchedules(dummySchedules)}
+                className="p-3 hover:bg-white/20 rounded-xl transition-all hover:scale-105 active:scale-95"
+                title="Refresh"
+              >
+                <RefreshCw className="w-6 h-6" />
+              </button>
+            </div>
 
-                  {schedules.map((schedule) => (
-                    <div
-                      key={schedule.id}
-                      className={`flex items-center justify-between p-6 rounded-xl border transition-all duration-200 hover:shadow-lg ${
-                        schedule.booked
-                          ? "border-red-200 bg-gradient-to-r from-red-50 to-pink-50"
-                          : "border-green-200 bg-gradient-to-r from-green-50 to-emerald-50"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="flex-shrink-0">
-                          <div
-                            className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                              schedule.booked ? "bg-gray-200" : "bg-green-100"
-                            }`}
-                          >
-                            {schedule.booked ? (
-                              <svg
-                                className="w-6 h-6 text-gray-500"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                                  clipRule="evenodd"
-                                ></path>
-                              </svg>
-                            ) : (
-                              <svg
-                                className="w-6 h-6 text-green-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                ></path>
-                              </svg>
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-lg font-semibold text-gray-900">
-                              {formatTime(schedule.start)} -{" "}
-                              {formatTime(schedule.end)}
-                            </span>
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                schedule.booked
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-green-100 text-green-800"
-                              }`}
-                            >
-                              {schedule.booked ? "Booked" : "Available"}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {schedule.booked
-                              ? "This appointment is booked and cannot be deleted"
-                              : "Click delete to remove this appointment"}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex-shrink-0">
-                        <button
-                          onClick={() => deleteSchedule(schedule.id)}
-                          disabled={schedule.booked}
-                          className={`p-3 rounded-lg transition-all duration-200 flex items-center justify-center ${
-                            schedule.booked
-                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                              : "bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 hover:scale-105"
-                          }`}
-                          title={
-                            schedule.booked
-                              ? "Cannot delete booked appointment"
-                              : "Delete appointment"
-                          }
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4 mt-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                <p className="text-4xl font-bold">{availableCount}</p>
+                <p className="text-sm text-indigo-100 mt-1">Available Slots</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                <p className="text-4xl font-bold">{bookedCount}</p>
+                <p className="text-sm text-indigo-100 mt-1">Booked Slots</p>
+              </div>
             </div>
           </div>
-        )}
+
+          {/* Error */}
+          {error && (
+            <div className="mx-8 mt-6 p-4 bg-red-500 text-white rounded-2xl text-sm flex items-center justify-between shadow-lg animate-shake">
+              <span className="font-medium">{error}</span>
+              <button
+                onClick={() => setError(null)}
+                className="ml-4 hover:bg-red-600 rounded-lg p-1 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {/* Schedule List */}
+          <div className="p-8">
+            {schedules.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                  <Clock className="w-10 h-10 text-indigo-600" />
+                </div>
+                <p className="text-gray-700 font-medium text-lg">No schedules for this date</p>
+                <p className="text-gray-500 mt-2">
+                  Create a new time slot to get started
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {schedules.map((schedule) => (
+                  <div
+                    key={schedule.id}
+                    className={`group relative flex items-center justify-between p-5 rounded-2xl border-2 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
+                      schedule.booked
+                        ? "border-rose-200 bg-gradient-to-r from-rose-50 to-pink-50"
+                        : "border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-5">
+                      <div
+                        className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 ${
+                          schedule.booked
+                            ? "bg-gradient-to-br from-rose-400 to-pink-500"
+                            : "bg-gradient-to-br from-emerald-400 to-teal-500"
+                        }`}
+                      >
+                        <Clock className="w-7 h-7 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900 text-lg">
+                          {formatTime(schedule.start)} - {formatTime(schedule.end)}
+                        </p>
+                        <span
+                          className={`inline-block mt-2 text-xs px-3 py-1 rounded-full font-semibold ${
+                            schedule.booked
+                              ? "bg-rose-200 text-rose-800"
+                              : "bg-emerald-200 text-emerald-800"
+                          }`}
+                        >
+                          {schedule.booked ? "● Booked" : "● Available"}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => deleteSchedule(schedule.id)}
+                      disabled={schedule.booked}
+                      className={`p-4 rounded-xl transition-all duration-300 ${
+                        schedule.booked
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-50"
+                          : "bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white hover:scale-110 hover:rotate-12 shadow-lg"
+                      }`}
+                      title={
+                        schedule.booked
+                          ? "Cannot delete booked slot"
+                          : "Delete time slot"
+                      }
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
