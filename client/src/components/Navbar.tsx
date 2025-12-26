@@ -53,7 +53,7 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="hidden md:flex gap-3">
-                <Link to="department">
+                <Link to="/department">
                   <button
                     className={`group flex items-center justify-center gap-2 py-2 px-4 rounded-xl font-medium transition-all ${
                       currentPath === "/department"
@@ -65,7 +65,7 @@ const Navbar = () => {
                     <span>Departments</span>
                   </button>
                 </Link>
-                <Link to="profile">
+                <Link to="/profile">
                   <button
                     className={`group flex items-center justify-center gap-2 py-2 px-4 rounded-xl font-medium transition-all ${
                       currentPath === "/profile"

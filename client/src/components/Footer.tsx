@@ -8,8 +8,8 @@ import {
   Linkedin,
   Instagram,
 } from "lucide-react";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../hooks/reduxHooks";
 
 const Icons = [
   {
@@ -30,8 +30,27 @@ const Icons = [
   },
 ];
 
+const Resources = [
+  {
+    name: "About Us",
+    link: "/about"
+  },{
+    name: "How It Works",
+    link: "/guide"
+  },{
+    name: "FAQs",
+    link: "/faq"
+  },{
+    name: "Support Center",
+    link: "/support"
+  },{
+    name: "Blog",
+    link: "/blog"
+  }
+]
+
 export function Footer() {
-  const [isAuthenticated] = useState(false);
+  const { isLoggedIn } = useAppSelector((s) => s.auth);
   const navigate = useNavigate();
 
   return (
@@ -88,7 +107,7 @@ export function Footer() {
                       Home
                     </button>
                   </li>
-                  {!isAuthenticated && (
+                  {!isLoggedIn ? (
                     <>
                       <li>
                         <button
@@ -115,8 +134,7 @@ export function Footer() {
                         </button>
                       </li>
                     </>
-                  )}
-                  {isAuthenticated && (
+                  ):(
                     <>
                       <li>
                         <button
@@ -145,19 +163,13 @@ export function Footer() {
           <div>
             <h4 className="text-white mb-4 font-semibold">Resources</h4>
             <ul className="space-y-3">
-              {[
-                "About Us",
-                "How It Works",
-                "FAQs",
-                "Support Center",
-                "Blog",
-              ].map((item, i) => (
+              {Resources.map((item, i) => (
                 <li key={i}>
                   <a
-                    href="#"
+                    href={item.link}
                     className="hover:text-primary transition-colors duration-150 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-400 after:transition-all after:duration-300 hover:after:w-full"
                   >
-                    {item}
+                    {item.name}
                   </a>
                 </li>
               ))}
