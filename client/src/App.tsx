@@ -10,6 +10,7 @@ import { login } from "./redux/auth/authSlice";
 import Departments from "./pages/Departments";
 import PageNotFound from "./pages/PageNotFound";
 import Profile from "./components/Dashboard/Profile";
+import About from "./pages/About";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -33,6 +34,7 @@ const App = () => {
       <Routes>
         <Route path="*" element={<PageNotFound />} />
         <Route path="/" element={<Landing />} />
+        <Route path="/about" element={<About/>}/>
         {isLoggedIn && (
           <>
             <Route path="/book" element={<BookSchedule />} />
