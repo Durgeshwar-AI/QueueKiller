@@ -33,22 +33,40 @@ const Icons = [
 const Resources = [
   {
     name: "About Us",
-    link: "/about"
-  },{
+    link: "/about",
+  },
+  {
     name: "How It Works",
-    link: "/guide"
-  },{
+    link: "/guide",
+  },
+  {
     name: "FAQs",
-    link: "/faq"
-  },{
+    link: "/faq",
+  },
+  {
     name: "Support Center",
-    link: "/support"
-  },{
+    link: "/support",
+  },
+  {
     name: "Blog",
-    link: "/blog"
-  }
-]
+    link: "/blog",
+  },
+];
 
+const BottomLink = [
+  {
+    name: "Privacy Policy",
+    link: "/privacy",
+  },
+  {
+    name: "Terms of Service",
+    link: "/terms",
+  },
+  {
+    name: "Cookie Policy",
+    link: "/cookie",
+  },
+];
 export function Footer() {
   const { isLoggedIn } = useAppSelector((s) => s.auth);
   const navigate = useNavigate();
@@ -134,7 +152,7 @@ export function Footer() {
                         </button>
                       </li>
                     </>
-                  ):(
+                  ) : (
                     <>
                       <li>
                         <button
@@ -217,17 +235,15 @@ export function Footer() {
               &copy; 2025 ScheduleBook. All rights reserved.
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-gray-400">
-              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map(
-                (item, i) => (
-                  <a
-                    key={i}
-                    href="#"
-                    className="hover:text-primary transition-colors duration-150 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-400 after:transition-all after:duration-300 hover:after:w-full"
-                  >
-                    {item}
-                  </a>
-                )
-              )}
+              {BottomLink.map((item, i) => (
+                <a
+                  key={i}
+                  href={item.link}
+                  className="hover:text-primary transition-colors duration-150 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-400 after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  {item.name}
+                </a>
+              ))}
             </div>
           </div>
         </div>

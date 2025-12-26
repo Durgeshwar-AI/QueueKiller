@@ -11,6 +11,7 @@ import Departments from "./pages/Departments";
 import PageNotFound from "./pages/PageNotFound";
 import Profile from "./components/Dashboard/Profile";
 import About from "./pages/About";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -35,6 +36,7 @@ const App = () => {
         <Route path="*" element={<PageNotFound />} />
         <Route path="/" element={<Landing />} />
         <Route path="/about" element={<About/>}/>
+        <Route path="/privacy" element={<PrivacyPolicy/>}/>
         {isLoggedIn && (
           <>
             <Route path="/book" element={<BookSchedule />} />
