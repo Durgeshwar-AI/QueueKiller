@@ -5,27 +5,46 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { useEffect } from "react";
-import { useAppDispatch } from "./hooks/reduxHooks";
+import { useAppDispatch, useAppSelector } from "./hooks/reduxHooks";
 import { login } from "./redux/auth/authSlice";
 import Departments from "./pages/Departments";
+import PageNotFound from "./pages/PageNotFound";
 
 const App = () => {
   const dispatch = useAppDispatch();
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      dispatch(login({ token, name: localStorage.getItem("name") || "", role: localStorage.getItem("role") || "user" }));
+      dispatch(
+        login({
+          token,
+          name: localStorage.getItem("name") || "",
+          role: localStorage.getItem("role") || "user",
+        })
+      );
     }
   }, [dispatch]);
+
+  const { isLoggedIn } = useAppSelector((s) => s.auth);
+
   return (
     <div className="flex flex-col min-h-screen relative">
       <Routes>
-        <Route path="/" element={<Landing />}/>
-        <Route path="/book" element={<BookSchedule />}/>
-        <Route path="/department" element={<Departments />}/>
-        <Route path="/schedule" element={<Scheduler/>}/>
-        <Route path="/login" element={<Login/>}/>
-        <Route path="/signup" element={<Signup/>}/>
+        <Route path="*" element={<PageNotFound />} />
+        <Route path="/" element={<Landing />} />
+        {isLoggedIn && (
+          <>
+            <Route path="/book" element={<BookSchedule />} />
+            <Route path="/department" element={<Departments />} />
+          </>
+        )}
+        {<Route path="/schedule" element={<Scheduler />} />}
+        {!isLoggedIn && (
+          <>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </>
+        )}
       </Routes>
     </div>
   );
