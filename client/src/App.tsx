@@ -12,6 +12,7 @@ import PageNotFound from "./pages/PageNotFound";
 import Profile from "./components/Dashboard/Profile";
 import About from "./pages/About";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -37,6 +38,7 @@ const App = () => {
         <Route path="/" element={<Landing />} />
         <Route path="/about" element={<About/>}/>
         <Route path="/privacy" element={<PrivacyPolicy/>}/>
+        <Route path="/terms" element={<TermsOfService/>}/>
         {isLoggedIn && (
           <>
             <Route path="/book" element={<BookSchedule />} />
