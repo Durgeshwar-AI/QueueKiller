@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from "./hooks/reduxHooks";
 import { login } from "./redux/auth/authSlice";
 import Departments from "./pages/Departments";
 import PageNotFound from "./pages/PageNotFound";
+import Profile from "./components/Dashboard/Profile";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -36,6 +37,7 @@ const App = () => {
           <>
             <Route path="/book" element={<BookSchedule />} />
             <Route path="/department" element={<Departments />} />
+            <Route path="/profile" element={<Profile/>}/>
           </>
         )}
         {<Route path="/schedule" element={<Scheduler />} />}
