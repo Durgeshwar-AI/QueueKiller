@@ -13,6 +13,7 @@ import Profile from "./components/Dashboard/Profile";
 import About from "./pages/About";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import CookiePolicy from "./pages/CookiePolicy";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -39,6 +40,7 @@ const App = () => {
         <Route path="/about" element={<About/>}/>
         <Route path="/privacy" element={<PrivacyPolicy/>}/>
         <Route path="/terms" element={<TermsOfService/>}/>
+        <Route path="/cookie" element={<CookiePolicy/>}/>
         {isLoggedIn && (
           <>
             <Route path="/book" element={<BookSchedule />} />
