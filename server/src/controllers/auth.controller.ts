@@ -3,6 +3,21 @@ import bcrypt from "bcrypt";
 import { User } from "../models/user.model";
 import { generateToken } from "../utils/token";
 
+export const pingUser = async (req: Request, res: Response) => {
+  const _id = req.body.user?._id;
+  try {
+    const user = await User.findOne({ _id });
+    if (user) {
+      const token = generateToken(user.email, user.role, _id);
+      res.status(200).json({ token: token, name: user.name, role: user.role });
+    } else {
+      res.status(401).json({ message: "No user found" });
+    }
+  } catch (e) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const registerUser = async (req: Request, res: Response) => {
   try {
     const { name, email, password, role } = req.body;

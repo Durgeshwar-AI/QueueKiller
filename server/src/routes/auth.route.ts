@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { registerUser, userLogin } from "../controllers/auth.controller";
+import {
+  pingUser,
+  registerUser,
+  userLogin,
+} from "../controllers/auth.controller";
 import {
   companyLogin,
   registerCompany,
@@ -18,6 +22,8 @@ import { registerAdmin } from "../controllers/adminAuth.controller";
 const router = Router();
 
 router.post("/admin/register", registerValidation, registerAdmin);
+
+router.get("/user/ping", authenticate, pingUser);
 
 router.post("/login", loginValidation, userLogin);
 router.post("/register", registerValidation, registerUser);

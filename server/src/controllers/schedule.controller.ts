@@ -79,7 +79,7 @@ export const createSchedule = async (
 
 export const bookSchedule = async (
   req: AuthenticatedRequest &
-    Request<{}, {}, { schedulesId: string; id: string }>,
+    Request<{}, {}, { schedulesId: string; id: string; user: object }>,
   res: Response<{ message?: string; error?: string }>,
 ): Promise<void> => {
   const { schedulesId, id } = req.body;

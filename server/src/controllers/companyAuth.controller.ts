@@ -9,7 +9,7 @@ export const registerCompany = async (
   res: Response,
 ) => {
   try {
-    const role = req.user?.role;
+    const role = req.body.user?.role;
     const { name, departments, email, password } = req.body;
     if (role !== "admin") {
       return res

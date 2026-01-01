@@ -6,7 +6,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "./hooks/reduxHooks";
-import { login } from "./redux/auth/authSlice";
+import { login, logout } from "./redux/auth/authSlice";
 import Departments from "./pages/Departments";
 import PageNotFound from "./pages/PageNotFound";
 import Profile from "./components/Dashboard/Profile";
@@ -14,38 +14,57 @@ import About from "./pages/About";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
+import HowItWorks from "./pages/HowItWorks";
+import axios from "axios";
+
+const URL = process.env.API_URL;
 
 const App = () => {
   const dispatch = useAppDispatch();
+  const { isLoggedIn } = useAppSelector((s) => s.auth);
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      dispatch(
-        login({
-          token,
-          name: localStorage.getItem("name") || "",
-          role: localStorage.getItem("role") || "user",
-        })
-      );
-    }
-  }, [dispatch]);
+    if (!token) return;
 
-  const { isLoggedIn } = useAppSelector((s) => s.auth);
+    const ping = async () => {
+      try {
+        const { data } = await axios.get(`${URL}/api/auth/user/ping`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        dispatch(
+          login({
+            token: data.token,
+            name: data.user.name,
+            role: data.user.role,
+          })
+        );
+      } catch (err) {
+        console.log(err);
+        localStorage.clear();
+        dispatch(logout());
+      }
+    };
+
+    ping();
+  }, [dispatch]);
 
   return (
     <div className="flex flex-col min-h-screen relative">
       <Routes>
-        <Route path="*" element={<PageNotFound />} />
         <Route path="/" element={<Landing />} />
-        <Route path="/about" element={<About/>}/>
-        <Route path="/privacy" element={<PrivacyPolicy/>}/>
-        <Route path="/terms" element={<TermsOfService/>}/>
-        <Route path="/cookie" element={<CookiePolicy/>}/>
+        <Route path="/about" element={<About />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/cookie" element={<CookiePolicy />} />
+        <Route path="/guide" element={<HowItWorks />} />
         {isLoggedIn && (
           <>
             <Route path="/book" element={<BookSchedule />} />
             <Route path="/department" element={<Departments />} />
-            <Route path="/profile" element={<Profile/>}/>
+            <Route path="/profile" element={<Profile />} />
           </>
         )}
         {<Route path="/schedule" element={<Scheduler />} />}
@@ -55,6 +74,7 @@ const App = () => {
             <Route path="/signup" element={<Signup />} />
           </>
         )}
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </div>
   );
