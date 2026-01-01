@@ -14,6 +14,7 @@ export const pingUser = async (req: Request, res: Response) => {
       res.status(401).json({ message: "No user found" });
     }
   } catch (e) {
+    console.log(e);
     res.status(500).json({ message: "Internal server error" });
   }
 };
