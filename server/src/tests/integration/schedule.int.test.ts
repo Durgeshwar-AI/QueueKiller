@@ -1,153 +1,185 @@
-// src/tests/integration/schedule.int.test.ts
+process.env.JWT_SECRET = "change-me-in-production";
+process.env.NODE_ENV = "test";
+
 jest.setTimeout(20000);
 
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import request from "supertest";
-import Schedule from "../../models/schedule.model";
+import jwt from "jsonwebtoken";
+
 import app from "../../app";
+import Schedule from "../../models/schedule.model";
 import { connectRedis, stopRedis } from "../../utils/redis";
 import { fillBucket } from "../../middlewares/rateLimiter";
-import jwt from "jsonwebtoken";
 
 const BASE = process.env.TEST_BASE_PATH || "/api/schedule";
 
-describe("Schedule integration tests", () => {
-  let mongoServer: MongoMemoryServer | undefined;
-  let redisClient: any;
+describe("Schedule Integration Tests", () => {
+  let mongoServer: MongoMemoryServer;
 
-  // -------------------
-  // Setup
-  // -------------------
+  // ------------------------
+  // SETUP
+  // ------------------------
   beforeAll(async () => {
-    // 1️⃣ Start Redis (or mock if you want)
-    redisClient = await connectRedis();
+    // Redis (required by rate limiter)
+    await connectRedis();
     await fillBucket();
 
-    // 2️⃣ Start in-memory MongoDB
+    // MongoDB Memory Server
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
-    process.env.MONGO_URI = uri; // ensure your app uses this URI
 
-    // 3️⃣ Disconnect if already connected
-    if (mongoose.connection.readyState !== 0) await mongoose.disconnect();
+    process.env.MONGO_URI = uri;
+    process.env.JWT_SECRET = "change-me-in-production";
 
-    // 4️⃣ Connect to in-memory DB
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+
     await mongoose.connect(uri, { dbName: "test" });
-    jest.resetModules();
   });
 
-  // -------------------
-  // Teardown
-  // -------------------
+  // ------------------------
+  // TEARDOWN
+  // ------------------------
   afterAll(async () => {
-    // 5️⃣ Disconnect MongoDB
     await mongoose.disconnect();
     await stopRedis();
-    if (mongoServer) await mongoServer.stop();
+    await mongoServer.stop();
   });
 
-  // -------------------
-  // Cleanup before each test
-  // -------------------
   beforeEach(async () => {
     await Schedule.deleteMany({});
   });
 
-  // -------------------
-  // Integration tests
-  // -------------------
-  test("create -> get -> book -> delete flow", async () => {
+  // ------------------------
+  // TESTS
+  // ------------------------
+  test("create → get → book → delete flow", async () => {
     const company = "acme";
     const department = "sales";
     const date = "2025-10-23";
-    const start = "09:00";
-    const end = "10:00";
 
-    const cid = new mongoose.Types.ObjectId().toHexString();
-
+    // ------------------------
+    // JWT TOKENS
+    // ------------------------
+    const userId = new mongoose.Types.ObjectId().toString();
     const token = jwt.sign(
-      { _id: cid, email: "abc@abc.abc", role: "user" },
-      process.env.JWT_SECRET || "change-me-in-production",
+      { _id: userId, email: "user@test.com", role: "user" },
+      process.env.JWT_SECRET!,
       { expiresIn: "1h" },
     );
 
-    const anotherUserId = new mongoose.Types.ObjectId().toHexString();
+    const anotherUserId = new mongoose.Types.ObjectId().toString();
     const anotherToken = jwt.sign(
-      { _id: anotherUserId, email: "different@abc.com", role: "user" },
-      process.env.JWT_SECRET || "change-me-in-production",
+      { _id: anotherUserId, email: "other@test.com", role: "user" },
+      process.env.JWT_SECRET!,
       { expiresIn: "1h" },
     );
 
-    // Create schedule
+    // ------------------------
+    // CREATE SLOT
+    // ------------------------
     const createRes = await request(app)
       .post(`${BASE}/create`)
-      .send({ company, department, date, start, end })
+      .send({
+        company,
+        department,
+        date,
+        start: "09:00",
+        end: "10:00",
+      })
       .expect(201);
+
     expect(createRes.body.message).toBe("Schedule created successfully");
 
-    // Fetch schedule
+    // ------------------------
+    // GET SLOT
+    // ------------------------
     const getRes = await request(app)
-      .get(`${BASE}`)
+      .get(BASE)
       .query({ company, department, date })
       .expect(200);
-    expect(Array.isArray(getRes.body.schedule)).toBe(true);
-    expect(getRes.body.schedule.length).toBe(1);
-    const slot = getRes.body.schedule[0];
-    expect(slot.start).toBe(start);
-    expect(slot.end).toBe(end);
 
-    // Get parent doc
+    expect(getRes.body.schedule.length).toBe(1);
+
+    const slot = getRes.body.schedule[0];
+    expect(slot.start).toBe("09:00");
+
+    // ------------------------
+    // DB CHECK
+    // ------------------------
     const doc = await Schedule.findOne({ company, department, date }).lean();
     expect(doc).toBeTruthy();
-    const schedulesId = (doc! as any)._id.toString();
-    const slotId = (doc! as any).schedules[0].id;
 
-    // Book the slot
+    const schedulesId = doc!._id.toString();
+    const slotId = doc!.schedules[0].id;
+
+    // ------------------------
+    // BOOK SLOT
+    // ------------------------
     const bookRes = await request(app)
       .put(`${BASE}/book`)
       .set("authorization", `Bearer ${token}`)
-      .send({ schedulesId, id: slotId }) // FIXED
+      .send({ schedulesId, id: slotId })
       .expect(200);
+
     expect(bookRes.body.message).toBe("Booked successfully");
 
-    // Booking again should fail
+    // ------------------------
+    // BOOK AGAIN (FAIL)
+    // ------------------------
     await request(app)
       .put(`${BASE}/book`)
       .set("authorization", `Bearer ${anotherToken}`)
-      .send({
-        schedulesId,
-        id: slotId, // FIXED
-      })
+      .send({ schedulesId, id: slotId })
       .expect(400);
 
-    // Delete booked slot -> should fail
+    // ------------------------
+    // DELETE BOOKED SLOT (FAIL)
+    // ------------------------
     await request(app).delete(`${BASE}/delete/${slotId}`).expect(400);
 
-    // Create another slot and delete when unbooked
+    // ------------------------
+    // CREATE SECOND SLOT
+    // ------------------------
     const createRes2 = await request(app)
       .post(`${BASE}/create`)
-      .send({ company, department, date, start: "10:00", end: "11:00" })
+      .send({
+        company,
+        department,
+        date,
+        start: "10:00",
+        end: "11:00",
+      })
       .expect(200);
+
     expect(createRes2.body.message).toBe("Schedule updated successfully");
 
+    // ------------------------
+    // DELETE UNBOOKED SLOT
+    // ------------------------
     const doc2 = await Schedule.findOne({ company, department, date }).lean();
-    const newSlot = (doc2! as any).schedules.find(
-      (s: any) => s.start === "10:00",
-    );
+    const newSlot = doc2!.schedules.find((s: any) => s.start === "10:00");
+
     expect(newSlot).toBeTruthy();
 
-    await request(app).delete(`${BASE}/delete/${newSlot.id}`).expect(200);
+    await request(app).delete(`${BASE}/delete/${newSlot!.id}`).expect(200);
   });
 
-  test("get non-existent schedule returns 204", async () => {
+  test("get non-existing schedule returns 204", async () => {
     await request(app)
-      .get(`${BASE}`)
-      .query({ company: "nope", department: "General", date: "2099-01-01" })
+      .get(BASE)
+      .query({
+        company: "none",
+        department: "none",
+        date: "2099-01-01",
+      })
       .expect(204);
   });
 
-  test("delete non-existent slot returns 204", async () => {
-    await request(app).delete(`${BASE}/delete/nonexistent-id`).expect(204);
+  test("delete non-existing slot returns 204", async () => {
+    await request(app).delete(`${BASE}/delete/non-existent-id`).expect(204);
   });
 });

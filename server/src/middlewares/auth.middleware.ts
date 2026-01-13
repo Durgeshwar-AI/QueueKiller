@@ -1,31 +1,34 @@
 import { Request, Response, NextFunction } from "express";
 import { getTokenFromHeader, verifyToken } from "../utils/token";
 
-export interface AuthenticatedRequest extends Request {
+export interface AuthRequest extends Request {
   user?: {
+    _id: string;
     email: string;
     role: string;
-    _id: string;
-    iat?: number;
-    exp?: number;
   };
 }
 
-export const authenticate = (
-  req: AuthenticatedRequest,
+export const authMiddleware = (
+  req: AuthRequest,
   res: Response,
   next: NextFunction,
 ) => {
   const token = getTokenFromHeader(req);
   if (!token) {
-    return res.status(401).json({ message: "No token provided" });
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
   const decoded = verifyToken(token);
   if (!decoded) {
-    return res.status(401).json({ message: "Invalid or expired token" });
+    return res.status(401).json({ message: "Invalid token" });
   }
 
-  req.body.user = decoded; // ✅ fully typed
+  req.user = {
+    _id: decoded._id,
+    email: decoded.email,
+    role: decoded.role,
+  };
+
   next();
 };

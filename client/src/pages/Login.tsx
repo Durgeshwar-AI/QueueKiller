@@ -39,7 +39,7 @@ const Login = () => {
             <p className="text-muted-foreground">Log in to get started</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" aria-label="login form">
             <div className="space-y-2 flex flex-col">
               <label htmlFor="email">Email</label>
               <input

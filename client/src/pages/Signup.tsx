@@ -44,7 +44,7 @@ const Signup = () => {
             <p className="text-muted-foreground">Sign up to get started</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" aria-label="signup form">
             <div className="space-y-2 flex flex-col">
               <label htmlFor="firstName">Full Name</label>
               <input
