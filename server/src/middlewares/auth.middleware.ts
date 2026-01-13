@@ -9,6 +9,16 @@ export interface AuthRequest extends Request {
   };
 }
 
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    email: string;
+    role: string;
+    _id: string;
+    iat?: number;
+    exp?: number;
+  };
+}
+
 export const authMiddleware = (
   req: AuthRequest,
   res: Response,
