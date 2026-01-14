@@ -1,5 +1,4 @@
 #!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
 
 # Prevent committing with NODE_ENV=production
 if [ "$NODE_ENV" = "production" ]; then
