@@ -25,3 +25,6 @@ async function startServer() {
   }
 }
 startServer();
+process.on("SIGINT", async () => {
+  await prisma.$disconnect();
+});
