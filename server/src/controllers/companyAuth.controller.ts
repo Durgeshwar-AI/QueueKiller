@@ -55,11 +55,7 @@ export const companyLogin = async (req: Request, res: Response) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-    const token = generateToken(
-      company.email,
-      company.role,
-      company._id.toString(),
-    );
+    const token = generateToken(company.email, 20);
     res.status(200).json({
       message: "Login successful",
       token,

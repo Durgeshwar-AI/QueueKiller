@@ -31,7 +31,7 @@ export const registerAdmin = async (req: Request, res: Response) => {
       role: "admin",
     });
 
-    const token = generateToken(user.email, user.role, user._id.toString());
+    const token = generateToken(user.email, 30);
 
     return res.status(201).json({
       message: "Admin registered successfully",

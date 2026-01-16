@@ -1,12 +1,9 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request } from "express";
 
-type Role = string;
-
 export interface TokenPayload {
   email: string;
-  role: Role;
-  _id: string;
+  id: number;
 }
 
 const getJwtSecret = () => {
@@ -16,12 +13,8 @@ const getJwtSecret = () => {
   return process.env.JWT_SECRET;
 };
 
-export const generateToken = (
-  email: string,
-  role: Role,
-  _id: string,
-): string => {
-  const payload: TokenPayload = { email, role, _id };
+export const generateToken = (email: string, id: number): string => {
+  const payload: TokenPayload = { email, id };
   return jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" });
 };
 
