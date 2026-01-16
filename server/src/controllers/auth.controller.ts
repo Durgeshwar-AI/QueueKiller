@@ -29,7 +29,7 @@ export const pingUser = async (req: Request, res: Response) => {
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, age, image, location } = req.body;
+    const { name, email, password } = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -46,9 +46,6 @@ export const registerUser = async (req: Request, res: Response) => {
         name,
         email,
         password: hashedPassword,
-        age,
-        image,
-        location,
       },
     });
 

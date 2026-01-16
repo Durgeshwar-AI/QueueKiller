@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/"
+  provider   = "prisma-client"
+  output     = "../src/generated/"
   engineType = "client"
 }
 
@@ -15,96 +15,101 @@ datasource db {
 }
 
 enum DepartmentType {
-  ONLINE
-  OFFLINE
-  HYBRID
+  GENERAL
+  HEALTH
 }
 
+model Admin {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String
+}
 
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String
-  email     String    @unique
-  password  String
-  age       Int?
-  image     String?
-  location  String?
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String  @unique
+  password String
+  age      Int?
+  image    String?
+  location String?
 
   bookings  Booking[]
   schedules BookedSchedule[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Schedule {
-  id            Int              @id @default(autoincrement())
-  departmentId  Int
-  date          DateTime
-  startTime     DateTime
-  endTime       DateTime
+  id           Int      @id @default(autoincrement())
+  departmentId Int
+  date         DateTime
+  startTime    DateTime
+  endTime      DateTime
 
-  department    Department       @relation(fields: [departmentId], references: [id])
-  bookedSlots   BookedSchedule[]
+  department  Department       @relation(fields: [departmentId], references: [id])
+  bookedSlots BookedSchedule[]
 
-  createdAt     DateTime          @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Department {
-  id          Int          @id @default(autoincrement())
-  companyId   Int
-  name        String
-  type        DepartmentType
+  id        Int            @id @default(autoincrement())
+  companyId Int
+  name      String
+  type      DepartmentType
 
-  company     Company      @relation(fields: [companyId], references: [id])
-  schedules   Schedule[]
-  bookings    Booking[]
+  company   Company    @relation(fields: [companyId], references: [id])
+  schedules Schedule[]
+  bookings  Booking[]
 
-  createdAt   DateTime     @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Company {
-  id          Int          @id @default(autoincrement())
-  name        String
-  key         String       @unique
-  password    String
+  id       Int    @id @default(autoincrement())
+  name     String
+  key      String @unique
+  password String
 
   departments Department[]
   bookings    Booking[]
 
-  createdAt   DateTime     @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Booking {
-  id                Int       @id @default(autoincrement())
-  userId            Int
-  companyId         Int
-  departmentId      Int
+  id           Int @id @default(autoincrement())
+  userId       Int
+  companyId    Int
+  departmentId Int
 
-  bookingDate       DateTime  @default(now())
-  appointmentDate   DateTime
-  appointmentTime   DateTime
+  bookingDate     DateTime @default(now())
+  appointmentDate DateTime
+  appointmentTime DateTime
 
-  qrCode            String
+  qrCode String
 
-  user              User      @relation(fields: [userId], references: [id])
-  company           Company   @relation(fields: [companyId], references: [id])
-  department        Department@relation(fields: [departmentId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+  company    Company    @relation(fields: [companyId], references: [id])
+  department Department @relation(fields: [departmentId], references: [id])
 
-  createdAt         DateTime  @default(now())
+  createdAt DateTime @default(now())
 }
 
 model BookedSchedule {
-  id          Int       @id @default(autoincrement())
-  userId      Int
-  scheduleId  Int
+  id         Int @id @default(autoincrement())
+  userId     Int
+  scheduleId Int
 
-  startTime   DateTime
-  endTime     DateTime
-  qrCode      String
+  startTime DateTime
+  endTime   DateTime
+  qrCode    String
 
-  user        User      @relation(fields: [userId], references: [id])
-  schedule    Schedule  @relation(fields: [scheduleId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  schedule Schedule @relation(fields: [scheduleId], references: [id])
 
-  createdAt   DateTime  @default(now())
+  createdAt DateTime @default(now())
 }
