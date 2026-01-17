@@ -15,8 +15,14 @@ datasource db {
 }
 
 enum DepartmentType {
-  GENERAL
-  HEALTH
+  General
+  Health
+}
+
+enum BookingStatus {
+  Upcoming
+  Attended
+  Missed
 }
 
 model Admin {
@@ -27,30 +33,26 @@ model Admin {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
+  id       Int       @id @default(autoincrement())
   name     String
-  email    String  @unique
+  email    String    @unique
   password String
-  age      Int?
+  dob      DateTime?
   image    String?
   location String?
 
-  bookings  Booking[]
-  schedules BookedSchedule[]
-
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  booked    Booked[]
 }
 
-model Schedule {
-  id           Int      @id @default(autoincrement())
-  departmentId Int
-  date         DateTime
-  startTime    DateTime
-  endTime      DateTime
+model Company {
+  id       Int     @id @default(autoincrement())
+  name     String
+  key      String  @unique
+  password String
+  logo     String?
 
-  department  Department       @relation(fields: [departmentId], references: [id])
-  bookedSlots BookedSchedule[]
+  departments Department[]
 
   createdAt DateTime @default(now())
 }
@@ -59,57 +61,41 @@ model Department {
   id        Int            @id @default(autoincrement())
   companyId Int
   name      String
-  type      DepartmentType
+  type      DepartmentType @default(General)
 
-  company   Company    @relation(fields: [companyId], references: [id])
-  schedules Schedule[]
-  bookings  Booking[]
-
-  createdAt DateTime @default(now())
-}
-
-model Company {
-  id       Int    @id @default(autoincrement())
-  name     String
-  key      String @unique
-  password String
-
-  departments Department[]
-  bookings    Booking[]
+  company   Company     @relation(fields: [companyId], references: [id])
+  schedules Schedules[]
 
   createdAt DateTime @default(now())
+
+  @@index([companyId])
 }
 
-model Booking {
-  id           Int @id @default(autoincrement())
-  userId       Int
-  companyId    Int
+model Schedules {
+  id           Int      @id @default(autoincrement())
   departmentId Int
+  date         DateTime @db.Date
+  startTime    DateTime @db.Time
+  endTime      DateTime @db.Time
 
-  bookingDate     DateTime @default(now())
-  appointmentDate DateTime
-  appointmentTime DateTime
-
-  qrCode String
-
-  user       User       @relation(fields: [userId], references: [id])
-  company    Company    @relation(fields: [companyId], references: [id])
   department Department @relation(fields: [departmentId], references: [id])
+  booked     Booked[]
 
-  createdAt DateTime @default(now())
+  @@index([departmentId])
 }
 
-model BookedSchedule {
-  id         Int @id @default(autoincrement())
-  userId     Int
-  scheduleId Int
+model Booked {
+  id          Int           @id @default(autoincrement())
+  userId      Int
+  schedulesId Int           @unique
+  qrCode      String
+  status      BookingStatus @default(Upcoming)
 
-  startTime DateTime
-  endTime   DateTime
-  qrCode    String
-
-  user     User     @relation(fields: [userId], references: [id])
-  schedule Schedule @relation(fields: [scheduleId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  schedules Schedules @relation(fields: [schedulesId], references: [id])
 
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([schedulesId])
 }
