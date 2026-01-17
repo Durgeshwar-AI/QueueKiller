@@ -1,45 +1,62 @@
 # User model
+
 ### 1.1 Contents of the user model:
+
+- id
 - name
 - email
 - password
-- age?
+- dateOfBirth?
 - image?
 - location?
-- created at
-- updated at
-### 1.2 User bookings data model:
-- id
-- userId
-- companyId
-- departmentId
-- date of booking
-- date of appointment
-- time of appointment
-- qr code
+- createdAt
+- updatedAt
 
 # Company model
-### 1.1 Contents of the company model:
+
+### 2.1 Contents of the company model:
+
 - id
 - name
 - key
 - password
-- created at
-### 1.2 Departments model:
+- logo?
+- createdAt
+- updatedAt
+
+### 2.2 Departments model:
+
 - id
 - companyId
 - name
 - type
-### 1.3 Schedules model:
+- cost
+- createdAt
+
+# Schedules
+
+### 3.1 Schedules model:
+
 - id
 - departmentId
 - date
 - startTime
 - endTime
-### 1.4 Already booked schedules model:
+
+### 3.2 Bookings model (Renamed from "Already booked schedules"):
+
 - id
 - userId
-- schedulesId
-- startTime
-- endTime
-- qr code for verification
+- scheduleId
+- qrCodeToken
+- status (upcoming/completed/missed)
+- createdAt
+
+# Admin
+
+### Admin model
+
+- id
+- name
+- email
+- password
