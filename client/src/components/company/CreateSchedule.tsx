@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Clock, Plus, Check, Sparkles } from "lucide-react";
 import Calendar from "../Calender"; // adjust path if needed
 
