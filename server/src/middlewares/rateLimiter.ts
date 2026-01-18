@@ -1,11 +1,13 @@
 import { CronJob } from "cron";
 import { connectRedis } from "../utils/redis";
 import { NextFunction, Request, Response } from "express";
+import os from "os";
 
-const RATE_LIMIT = 10;
+const RATE_LIMIT = 300;
 const PREFIX = process.env.REDISPREFIX || "app:";
 
-const BUCKET_KEY = `${PREFIX}bucket`;
+const INSTANCE_ID = os.hostname() + "-" + process.pid;
+const BUCKET_KEY = `${PREFIX}bucket:${INSTANCE_ID}`;
 
 export const fillBucket = async () => {
   let client = await connectRedis();
@@ -51,4 +53,4 @@ const rateLimitMiddleware = async (
 
 export default rateLimitMiddleware;
 
-export const job = new CronJob("*/2 * * * * *", refillBucket);
+export const job = new CronJob("*/1 * * * * *", refillBucket);

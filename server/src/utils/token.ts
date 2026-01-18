@@ -1,19 +1,8 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request } from "express";
-
-//---------------------------------------------------------------------------------
-//------------------------Interfaces for type safety-------------------------------
-//---------------------------------------------------------------------------------
-
-export interface TokenPayload {
-  email: string;
-  id: number;
-}
-
-export interface companyTokenPayload {
-  key: string;
-  id: number;
-}
+import { userTokenPayload } from "../interfaces/user.interfaces";
+import { companyTokenPayload } from "../interfaces/company.interfaces";
+import { adminTokenPayload } from "../interfaces/admin.interfaces";
 
 //---------------------------------------------------------------------------------
 //-----------------JWT secret abstraction(useful for testing)----------------------
@@ -30,8 +19,8 @@ const getJwtSecret = () => {
 //-----------------------------Token Generation------------------------------------
 //---------------------------------------------------------------------------------
 
-export const generateToken = (email: string, id: number): string => {
-  const payload: TokenPayload = { email, id };
+export const generateUserToken = (email: string, id: number): string => {
+  const payload: userTokenPayload = { email, id };
   return jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" });
 };
 
@@ -40,15 +29,24 @@ export const generateCompanyToken = (key: string, id: number): string => {
   return jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" });
 };
 
+export const generateAdminToken = (
+  id: number,
+  email: string,
+  role: string,
+): string => {
+  const payload: adminTokenPayload = { id, email, role };
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" });
+};
+
 //---------------------------------------------------------------------------------
 //----------------------------Token Verification-----------------------------------
 //---------------------------------------------------------------------------------
 
-export const verifyToken = (
+export const verifyUserToken = (
   token: string,
-): (TokenPayload & JwtPayload) | null => {
+): (userTokenPayload & JwtPayload) | null => {
   try {
-    return jwt.verify(token, getJwtSecret()) as TokenPayload & JwtPayload;
+    return jwt.verify(token, getJwtSecret()) as userTokenPayload & JwtPayload;
   } catch {
     return null;
   }
@@ -60,6 +58,16 @@ export const verifyCompanyToken = (
   try {
     return jwt.verify(token, getJwtSecret()) as companyTokenPayload &
       JwtPayload;
+  } catch {
+    return null;
+  }
+};
+
+export const verifyAdminToken = (
+  token: string,
+): (adminTokenPayload & JwtPayload) | null => {
+  try {
+    return jwt.verify(token, getJwtSecret()) as adminTokenPayload & JwtPayload;
   } catch {
     return null;
   }
