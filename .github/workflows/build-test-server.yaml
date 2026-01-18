@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  build-and-test-backend:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -16,6 +16,39 @@ jobs:
     defaults:
       run:
         working-directory: server # All steps will execute inside /server
+
+    steps:
+      - uses: actions/checkout@v4 # Checkout your repository code
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm' # Cache npm dependencies for faster builds
+
+      - name: Install dependencies
+        run: npm ci # Use npm ci for clean installs in CI environments
+
+      - name: Generate prisma
+        run: npx prisma generate
+        env:
+          DATABASE_URL: "postgresql://user:pass@localhost:5432/db"
+
+      - name: Build TypeScript
+        run: npm run build # Or your custom build script, e.g., tsc
+
+      - name: Run tests
+        run: npm test # Or your custom test script, e.g., jest
+
+  build-and-test-frontend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [ 22.x ] # Specify Node.js versions to test against
+    
+    defaults:
+      run:
+        working-directory: client # All steps will execute inside /server
 
     steps:
       - uses: actions/checkout@v4 # Checkout your repository code
