@@ -30,6 +30,7 @@
 - GET /api/user/qr/:bookingID -> To let user see the qr of a booked slot
 
 ### Schedules
+- GET /api/user/schedules -> To get all the departments whose schedules can be booked
 - GET /api/user/schedules/:departmentsID?date=YYYY-MM-DD -> To find all the schedules for a given department on a given date
 
 ### Payments
