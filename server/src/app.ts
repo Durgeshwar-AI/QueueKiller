@@ -7,23 +7,23 @@ import rateLimitMiddleware from "./middlewares/rateLimiter";
 import mongoSanitize from "express-mongo-sanitize";
 
 // Importing all the admin routes
-import adminAuthRoutes from "./routes/admin.auth.route";
-import adminCompanyRoutes from "./routes/admin.company.route";
-import adminDepartmentRoutes from "./routes/admin.department.route";
+import adminAuthRoutes from "./routes/admin/admin.auth.route";
+import adminCompanyRoutes from "./routes/admin/admin.company.route";
+import adminDepartmentRoutes from "./routes/admin/admin.department.route";
 
 // Importing all the user routes
-import userAuthRoutes from "./routes/user.auth.route";
-import userRoutes from "./routes/user.profile.route";
-import userBookingsRoutes from "./routes/user.bookings.route";
-import userQrRoutes from "./routes/user.qr.route";
-import userSchedulesRoutes from "./routes/user.schedules.route";
-import userPaymentRoutes from "./routes/user.payments.route";
+import userAuthRoutes from "./routes/user/user.auth.route";
+import userRoutes from "./routes/user/user.profile.route";
+import userBookingsRoutes from "./routes/user/user.bookings.route";
+import userQrRoutes from "./routes/user/user.qr.route";
+import userSchedulesRoutes from "./routes/user/user.schedules.route";
+import userPaymentRoutes from "./routes/user/user.payments.route";
 
 // Importing all the company routes
-import companyAuthRoutes from "./routes/company.auth.route";
-import companyDepartmentsRoutes from "./routes/company.departments.route";
-import companySchedulesRoutes from "./routes/company.schedules.route";
-import companyBookingsRoutes from "./routes/company.bookings.route";
+import companyAuthRoutes from "./routes/company/company.auth.route";
+import companyDepartmentsRoutes from "./routes/company/company.departments.route";
+import companySchedulesRoutes from "./routes/company/company.schedules.route";
+import companyBookingsRoutes from "./routes/company/company.bookings.route";
 
 const app = express();
 config();

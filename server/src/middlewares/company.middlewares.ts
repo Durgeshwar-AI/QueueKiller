@@ -1,23 +1,14 @@
 import { Request, Response, NextFunction } from "express";
-import { getTokenFromHeader, verifyToken } from "../utils/token";
+import { getTokenFromHeader, verifyCompanyToken } from "../utils/token";
 
 export interface AuthRequest extends Request {
-  user?: {
+  company?: {
     id: number;
-    email: string;
+    key: string;
   };
 }
 
-export interface AuthenticatedRequest extends Request {
-  user?: {
-    email: string;
-    id: number;
-    iat?: number;
-    exp?: number;
-  };
-}
-
-export const authMiddleware = (
+export const companyAuthMiddleware = (
   req: AuthRequest,
   res: Response,
   next: NextFunction,
@@ -27,14 +18,14 @@ export const authMiddleware = (
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const decoded = verifyToken(token);
+  const decoded = verifyCompanyToken(token);
   if (!decoded) {
     return res.status(401).json({ message: "Invalid token" });
   }
 
-  req.user = {
+  req.company = {
     id: decoded.id,
-    email: decoded.email,
+    key: decoded.key,
   };
 
   next();

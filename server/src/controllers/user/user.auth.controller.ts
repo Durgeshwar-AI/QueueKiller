@@ -1,33 +1,16 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { generateToken } from "../utils/token";
-import prisma from "../utils/client";
+import { generateUserToken } from "../../utils/token";
+import prisma from "../../utils/client";
 
-export const pingUser = async (req: Request, res: Response) => {
-  const userId = req.body.user?.id;
-
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      return res.status(401).json({ message: "No user found" });
-    }
-
-    const token = generateToken(user.email, user.id);
-
-    res.status(200).json({
-      token,
-      name: user.name,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-export const registerUser = async (req: Request, res: Response) => {
+export const userRegister = async (
+  req: Request<{}, {}, { name: string; email: string; password: string }>,
+  res: Response<{
+    message: string;
+    token?: string;
+    user?: { id: number; name: string; email: string };
+  }>,
+) => {
   try {
     const { name, email, password } = req.body;
 
@@ -49,7 +32,7 @@ export const registerUser = async (req: Request, res: Response) => {
       },
     });
 
-    const token = generateToken(user.email, user.id);
+    const token = generateUserToken(user.email, user.id);
 
     res.status(201).json({
       message: "User registered successfully",
@@ -66,7 +49,14 @@ export const registerUser = async (req: Request, res: Response) => {
   }
 };
 
-export const userLogin = async (req: Request, res: Response) => {
+export const userLogin = async (
+  req: Request<{}, {}, { email: string; password: string }>,
+  res: Response<{
+    message: string;
+    token?: string;
+    user?: { id: number; name: string; email: string };
+  }>,
+) => {
   try {
     const { email, password } = req.body;
 
@@ -83,7 +73,7 @@ export const userLogin = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const token = generateToken(user.email, user.id);
+    const token = generateUserToken(user.email, user.id);
 
     res.status(200).json({
       message: "Login successful",
@@ -99,3 +89,29 @@ export const userLogin = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const userLogout = async (req: Request, res: Response) => {};
+
+// export const pingUser = async (req: Request, res: Response) => {
+//   const userId = req.body.user?.id;
+
+//   try {
+//     const user = await prisma.user.findUnique({
+//       where: { id: userId },
+//     });
+
+//     if (!user) {
+//       return res.status(401).json({ message: "No user found" });
+//     }
+
+//     const token = generateToken(user.email, user.id);
+
+//     res.status(200).json({
+//       token,
+//       name: user.name,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
