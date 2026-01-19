@@ -1,11 +1,11 @@
 import { body } from "express-validator";
 
-export const loginValidation = [
+export const userLoginValidation = [
   body("email").trim().isEmail().withMessage("Must be a valid email"),
   body("password").trim().notEmpty().withMessage("Password is required"),
 ];
 
-export const registerValidation = [
+export const userRegisterValidation = [
   body("name")
     .trim()
     .isLength({ min: 3 })
