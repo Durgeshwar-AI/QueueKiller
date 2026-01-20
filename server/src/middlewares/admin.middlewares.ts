@@ -2,16 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { getTokenFromHeader, verifyAdminToken } from "../utils/token";
 import prisma from "../utils/client";
 
-export interface AuthRequest extends Request {
-  user?: {
-    id: number;
-    email: string;
-    role: string;
-  };
-}
-
 export const adminAuthMiddleware = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) => {
@@ -28,16 +20,13 @@ export const adminAuthMiddleware = async (
       return res.status(401).json({ message: "Invalid or expired token" });
     }
 
-    // 🔒 Role check
-    if (decoded.role.toUpperCase() !== "ADMIN") {
+    if (decoded.role?.toUpperCase() !== "ADMIN") {
       return res.status(403).json({ message: "Admin access required" });
     }
 
-    // 🔍 DB validation (email + id)
     const admin = await prisma.admin.findUnique({
       where: {
         id: decoded.id,
-        email: decoded.email,
       },
       select: {
         id: true,
@@ -49,15 +38,10 @@ export const adminAuthMiddleware = async (
       return res.status(401).json({ message: "Admin not found" });
     }
 
-    if (admin.email !== decoded.email) {
-      return res.status(401).json({ message: "Token mismatch detected" });
-    }
-
-    // ✅ Attach verified admin to request
-    req.user = {
+    req.body.admin = {
       id: admin.id,
       email: admin.email,
-      role: "admin",
+      role: "Admin",
     };
 
     next();
