@@ -25,6 +25,12 @@ enum BookingStatus {
   Missed
 }
 
+enum statusTypes {
+  Available
+  Locked
+  Booked
+}
+
 model Admin {
   id       Int    @id @default(autoincrement())
   name     String
@@ -72,11 +78,12 @@ model Department {
 }
 
 model Schedules {
-  id           Int      @id @default(autoincrement())
+  id           Int         @id @default(autoincrement())
   departmentId Int
-  date         DateTime @db.Date
-  startTime    DateTime @db.Time
-  endTime      DateTime @db.Time
+  date         DateTime    @db.Date
+  startTime    DateTime    @db.Time
+  endTime      DateTime    @db.Time
+  status       statusTypes @default(Available)
 
   department Department @relation(fields: [departmentId], references: [id])
   booked     Booked[]

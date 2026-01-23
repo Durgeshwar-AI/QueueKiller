@@ -31,3 +31,28 @@ export async function stopRedis() {
   if (client?.isOpen) await client.disconnect();
   if (redisServer) await redisServer.stop();
 }
+
+export const createRedis = async (
+  key: string,
+  value: string,
+  duration: number, // seconds
+): Promise<void> => {
+  const client = await connectRedis();
+
+  await client.set(key, value, {
+    EX: duration,
+  });
+};
+
+export const checkRedis = async (key: string): Promise<boolean> => {
+  const client = await connectRedis();
+
+  const data = await client.get(key);
+  return data !== null;
+};
+
+export const deleteRedis = async (key: string): Promise<void> => {
+  const client = await connectRedis();
+
+  await client.del(key);
+};
