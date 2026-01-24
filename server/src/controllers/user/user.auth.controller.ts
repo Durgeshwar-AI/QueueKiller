@@ -90,7 +90,9 @@ export const userLogin = async (
   }
 };
 
-export const userLogout = async () => {};
+export const userLogout = async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Logout" });
+};
 
 // export const pingUser = async (req: Request, res: Response) => {
 //   const userId = req.body.user?.id;

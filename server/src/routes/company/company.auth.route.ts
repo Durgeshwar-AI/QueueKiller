@@ -4,6 +4,6 @@ import { companyLoginValidation } from "../../validators/company.validator";
 const router = Router();
 
 router.post("/login", companyLoginValidation);
-router.post("/logout");
+// router.post("/logout");
 
 export default router;

@@ -2,6 +2,6 @@ import { Router } from "express";
 
 const router = Router();
 
-router.post("/verify");
+// router.post("/verify");
 
 export default router;
