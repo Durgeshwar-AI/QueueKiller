@@ -5,3 +5,4 @@ dist
 .gitignore
 Dockerfile
 npm-debug.log
+generated

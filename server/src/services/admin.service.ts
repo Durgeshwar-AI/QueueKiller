@@ -7,12 +7,18 @@ export const registerAdmin = async () => {
   const name = "Admin";
   if (!email || !password) return;
   const hashedPassword = await bcrypt.hash(password, 10);
-  await prisma.admin.create({
-    data: {
-      name: name,
-      email: email,
-      password: hashedPassword,
-    },
+  const existing = await prisma.admin.findUnique({
+    where: { email },
   });
+
+  if (!existing) {
+    await prisma.admin.create({
+      data: {
+        name: name,
+        email: email,
+        password: hashedPassword,
+      },
+    });
+  }
   console.log("Initial admin online");
 };
