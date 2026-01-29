@@ -1,21 +1,26 @@
-import { Footer } from '../components/Footer'
-import Hero from '../components/Landing/Hero'
-import JoinUs from '../components/Landing/JoinUs'
-import Services from '../components/Landing/Services'
-import Trust from '../components/Landing/Trust'
-import Navbar from '../components/Navbar'
+import { useState } from "react";
+import Navbar from "../components/Navbar";
+import { Footer } from "../components/Footer";
+import HeroSection from "../components/Landing/HeroSection";
+import FeaturesSection from "../components/Landing/FeaturesSection";
+import BenefitsSection from "../components/Landing/BenefitsSection";
+import CTASection from "../components/Landing/CTASection";
+import VideoModal from "../components/Landing/VideoModal";
 
 const Landing = () => {
-  return (
-    <div className='w-full flex flex-col justify-center items-center'>
-        <Navbar/>
-        <Hero/>
-        <Services/>
-        <Trust/>
-        <JoinUs/>
-        <Footer/>
-    </div>
-  )
-}
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
 
-export default Landing
+  return (
+    <>
+      <Navbar />
+      <HeroSection onWatchDemo={() => setIsVideoOpen(true)} />
+      <FeaturesSection />
+      <BenefitsSection />
+      <CTASection />
+      <Footer />
+      <VideoModal isOpen={isVideoOpen} onClose={() => setIsVideoOpen(false)} />
+    </>
+  );
+};
+
+export default Landing;
