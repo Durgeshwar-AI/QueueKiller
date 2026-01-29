@@ -22,12 +22,12 @@ const initialState: IauthState = {
 type SignupPayload = { name: string; email: string; password: string };
 type LoginPayload = { email: string; password: string };
 
-const API_BASE = process.env.API_URL || "http://localhost:8000/api";
+const API_BASE = process.env.API_URL || "http://localhost:8000";
 
 export const signup = createAsyncThunk(
   "auth/signup",
   async (data: SignupPayload, { dispatch, rejectWithValue }) => {
-    const res = await fetch(`${API_BASE}/api/auth/register`, {
+    const res = await fetch(`${API_BASE}/api/user/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -55,7 +55,7 @@ export const signup = createAsyncThunk(
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (data: LoginPayload, { dispatch, rejectWithValue }) => {
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
+    const res = await fetch(`${API_BASE}/api/user/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),

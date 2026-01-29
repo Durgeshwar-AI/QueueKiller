@@ -1,5 +1,5 @@
 import { Building2, Calendar, User, Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../hooks/reduxHooks";
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
@@ -15,6 +15,7 @@ const Navbar = () => {
     console.log("Navbar - isLoggedIn:", isLoggedIn);
   }, [isLoggedIn]);
 
+  const navigate = useNavigate();
   const currentPath = location.pathname;
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
@@ -79,7 +80,10 @@ const Navbar = () => {
                 </Link>
                 <button
                   className="group flex items-center justify-center gap-2 text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 py-2 px-4 rounded-xl font-medium transition-all duration-150 hover:shadow-lg hover:shadow-red-500/30"
-                  onClick={() => dispatch(logout())}
+                  onClick={async () => {
+                    await dispatch(logout());
+                    navigate("/");
+                  }}
                 >
                   <ArrowRight className="w-5 h-5" />
                   <span>Logout</span>
