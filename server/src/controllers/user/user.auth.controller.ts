@@ -94,26 +94,29 @@ export const userLogout = async (req: Request, res: Response) => {
   res.status(200).json({ message: "Logout" });
 };
 
-// export const pingUser = async (req: Request, res: Response) => {
-//   const userId = req.body.user?.id;
+export const userPing = async (req: Request, res: Response) => {
+  const userId = req.body.user?.id;
+  console.log(userId);
 
-//   try {
-//     const user = await prisma.user.findUnique({
-//       where: { id: userId },
-//     });
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    console.log(user);
+    if (!user) {
+      return res.status(401).json({ message: "No user found" });
+    }
 
-//     if (!user) {
-//       return res.status(401).json({ message: "No user found" });
-//     }
+    const token = generateUserToken(user.email, user.id);
+    console.log(token);
 
-//     const token = generateToken(user.email, user.id);
-
-//     res.status(200).json({
-//       token,
-//       name: user.name,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
+    res.status(200).json({
+      token,
+      name: user.name,
+      email: user.email,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

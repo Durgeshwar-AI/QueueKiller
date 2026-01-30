@@ -4,7 +4,7 @@ import Scheduler from "./pages/Scheduler";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "./hooks/reduxHooks";
 import { login, logout } from "./redux/auth/authSlice";
 import Departments from "./pages/Departments";
@@ -22,34 +22,35 @@ const URL = process.env.API_URL;
 const App = () => {
   const dispatch = useAppDispatch();
   const { isLoggedIn } = useAppSelector((s) => s.auth);
+  const [hasPinged, setHasPinged] = useState(false);
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
     const ping = async () => {
       try {
-        const { data } = await axios.get(`${URL}/api/auth/user/ping`, {
+        const { data } = await axios.get(`${URL}/api/user/auth/ping`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
         dispatch(
           login({
             token: data.token,
-            name: data.user.name,
-            role: data.user.role,
-          })
+            name: data.name,
+            role: data.role,
+          }),
         );
       } catch (err) {
         console.log(err);
         localStorage.clear();
         dispatch(logout());
       }
+      setHasPinged(true);
     };
 
-    ping();
-  }, [dispatch]);
+    if (!hasPinged) ping();
+  }, [dispatch, hasPinged]);
 
   return (
     <div className="flex flex-col min-h-screen relative">

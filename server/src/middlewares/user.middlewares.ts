@@ -18,6 +18,10 @@ export const userAuthMiddleware = (
     return res.status(401).json({ message: "Invalid token" });
   }
 
+  if (!req.body) {
+    req.body = {};
+  }
+
   req.body.user = {
     id: decoded.id,
     email: decoded.email,
