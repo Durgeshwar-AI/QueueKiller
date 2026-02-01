@@ -2,19 +2,19 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 export interface IauthState {
-  role: string;
   name: string;
   token: string;
   isLoggedIn: boolean;
+  accountType: "company" | "admin" | "user" | null;
   loading?: boolean;
   error?: string | null;
 }
 
 const initialState: IauthState = {
-  role: "",
   name: "",
   token: "",
   isLoggedIn: false,
+  accountType: null,
   loading: false,
   error: null,
 };
@@ -44,12 +44,12 @@ export const signup = createAsyncThunk(
       login({
         token: json.token,
         name: json.user.name,
-        role: json.user.role,
-      })
+        accountType: "user",
+      }),
     );
 
     return json;
-  }
+  },
 );
 
 export const loginUser = createAsyncThunk(
@@ -71,12 +71,12 @@ export const loginUser = createAsyncThunk(
       login({
         token: json.token,
         name: json.user.name,
-        role: json.user.role,
-      })
+        accountType: "user"
+      }),
     );
 
     return json;
-  }
+  },
 );
 
 const authSlice = createSlice({
@@ -84,10 +84,10 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      state.role = "";
       state.name = "";
       state.token = "";
       state.isLoggedIn = false;
+      state.accountType = null;
       state.loading = false;
       state.error = null;
       localStorage.clear();
@@ -95,17 +95,21 @@ const authSlice = createSlice({
 
     login: (
       state,
-      action: PayloadAction<{ token: string; name: string; role: string }>
+      action: PayloadAction<{
+        token: string;
+        name: string;
+        accountType: "company" | "admin" | "user";
+      }>,
     ) => {
       state.isLoggedIn = true;
       state.token = action.payload.token;
-      state.role = action.payload.role;
       state.name = action.payload.name;
+      state.accountType = action.payload.accountType;
 
       if (action.payload.token) {
         localStorage.setItem("token", action.payload.token);
         localStorage.setItem("name", action.payload.name);
-        localStorage.setItem("role", action.payload.role);
+        localStorage.setItem("accountType", action.payload.accountType);
       }
     },
   },

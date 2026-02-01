@@ -16,12 +16,13 @@ import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
 import HowItWorks from "./pages/HowItWorks";
 import axios from "axios";
+import CompanyLogin from "./pages/CompanyLogin";
 
 const URL = process.env.API_URL;
 
 const App = () => {
   const dispatch = useAppDispatch();
-  const { isLoggedIn } = useAppSelector((s) => s.auth);
+  const { isLoggedIn, accountType } = useAppSelector((s) => s.auth);
   const [hasPinged, setHasPinged] = useState(false);
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -38,7 +39,7 @@ const App = () => {
           login({
             token: data.token,
             name: data.name,
-            role: data.role,
+            accountType: "user",
           }),
         );
       } catch (err) {
@@ -61,7 +62,7 @@ const App = () => {
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/cookie" element={<CookiePolicy />} />
         <Route path="/guide" element={<HowItWorks />} />
-        {isLoggedIn && (
+        {isLoggedIn && accountType === "user" && (
           <>
             <Route path="/book" element={<BookSchedule />} />
             <Route path="/department" element={<Departments />} />
@@ -73,6 +74,7 @@ const App = () => {
           <>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/company-login" element={<CompanyLogin />} />
           </>
         )}
         <Route path="*" element={<PageNotFound />} />
