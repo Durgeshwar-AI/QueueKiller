@@ -17,6 +17,7 @@ import CookiePolicy from "./pages/CookiePolicy";
 import HowItWorks from "./pages/HowItWorks";
 import axios from "axios";
 import CompanyLogin from "./pages/CompanyLogin";
+import CompanyDashboard from "./pages/CompanyDashboard";
 
 const URL = process.env.API_URL;
 
@@ -77,6 +78,7 @@ const App = () => {
             <Route path="/company-login" element={<CompanyLogin />} />
           </>
         )}
+        <Route path="/company" element={<CompanyDashboard/>}/>
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </div>
