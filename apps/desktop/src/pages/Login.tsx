@@ -36,7 +36,7 @@ const Login = () => {
           <div className="space-y-4">
             <div className="space-y-2 flex flex-col">
               <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                Company Email
+                Key
               </label>
               <input
                 id="email"
@@ -71,7 +71,7 @@ const Login = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-sm">
+            {/* <div className="flex items-center justify-between text-sm">
               <label className="flex items-center">
                 <input 
                   type="checkbox" 
@@ -82,7 +82,7 @@ const Login = () => {
               <button className="text-blue-500 hover:underline">
                 Forgot password?
               </button>
-            </div>
+            </div> */}
 
             <button
               onClick={handleSubmit}
