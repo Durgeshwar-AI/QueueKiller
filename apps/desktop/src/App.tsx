@@ -1,19 +1,37 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "./redux/store";
+
+// Pages
 import Login from "./pages/Login";
-import Home from "./pages/Home";
-import Contact from "./pages/Contact";
+import Dashboard from "./pages/Dashboard";
+import Departments from "./pages/Departments";
+import Schedules from "./pages/Schedules";
+import Bookings from "./pages/Bookings";
+import Settings from "./pages/Settings";
 
 const App = () => {
-  const isLoggedIn = true;
+  const { isLoggedIn } = useSelector((state: RootState) => state.auth);
+
   return (
     <Routes>
-      {!isLoggedIn ? (
-        <Route path="/" element={<Login />} />
+      {isLoggedIn ? (
+        <>
+          <Route path="/" element={<Login />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </>
       ) : (
-        <Route path="/" element={<Home />} />
+        <>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/departments" element={<Departments />} />
+          <Route path="/schedules" element={<Schedules />} />
+          <Route path="/bookings" element={<Bookings />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </>
       )}
-      <Route path="/contact" element={<Contact />} />
     </Routes>
   );
 };
