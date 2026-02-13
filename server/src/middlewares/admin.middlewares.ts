@@ -2,8 +2,16 @@ import { Request, Response, NextFunction } from "express";
 import { getTokenFromHeader, verifyAdminToken } from "../utils/token";
 import prisma from "../utils/client";
 
+export interface AuthenticatedRequest extends Request {
+  admin?: {
+    id: number;
+    email: string;
+    role: string;
+  };
+}
+
 export const adminAuthMiddleware = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {
@@ -25,20 +33,16 @@ export const adminAuthMiddleware = async (
     }
 
     const admin = await prisma.admin.findUnique({
-      where: {
-        id: decoded.id,
-      },
-      select: {
-        id: true,
-        email: true,
-      },
+      where: { id: decoded.id },
+      select: { id: true, email: true },
     });
 
     if (!admin) {
       return res.status(401).json({ message: "Admin not found" });
     }
 
-    req.body.admin = {
+    // ✅ attach to req directly
+    req.admin = {
       id: admin.id,
       email: admin.email,
       role: "Admin",
