@@ -29,12 +29,6 @@ const Sidebar = () => {
       icon: "🏢",
       path: "/companies",
     },
-    {
-      id: "departments",
-      label: "Departments",
-      icon: "🏛️",
-      path: "/departments",
-    },
   ];
 
   const handleNavigation = (path: string) => {

@@ -2,6 +2,9 @@ import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Sidebar from "./components/Sidebar";
+import AddCompany from "./pages/company/AddCompany";
+import Companies from "./pages/company/Companies";
+import Company from "./pages/company/Company";
 
 const App = () => {
 
@@ -12,6 +15,9 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/companies" element={<Companies />} />
+          <Route path="/company/:id" element={<Company />} />
+          <Route path="/addcompany" element={<AddCompany />} />
         </Routes>
       </div>
     </div>
