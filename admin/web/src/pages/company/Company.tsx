@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../hooks/reduxHooks";
 
 interface Department {
   id: number;
@@ -30,6 +31,8 @@ const Company = () => {
     "General",
   );
 
+  const {token} = useAppSelector((s)=>s.auth);
+
   useEffect(() => {
     const getCompany = async () => {
       try {
@@ -38,7 +41,7 @@ const Company = () => {
 
         const { data } = await axios.get<Company>(`${API}/company/${id}`, {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBxdWV1ZWtpbGxlci5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzA5NjQ4MjYsImV4cCI6MTc3MTU2OTYyNn0.Tude2ojNEUaoB0Xx6KrWBLb3qEYl7U9E8TwlL7UG6So`,
+            Authorization: `Bearer ${token}`,
           },
         });
         setCompany(data);
@@ -56,7 +59,7 @@ const Company = () => {
     if (id) {
       getCompany();
     }
-  }, [id]);
+  }, [id, token]);
 
   const handleAddDepartment = async () => {
     if (newDeptName.trim()) {
@@ -70,7 +73,7 @@ const Company = () => {
           },
           {
             headers: {
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBxdWV1ZWtpbGxlci5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzA5NjQ4MjYsImV4cCI6MTc3MTU2OTYyNn0.Tude2ojNEUaoB0Xx6KrWBLb3qEYl7U9E8TwlL7UG6So`,
+              Authorization: `Bearer ${token}`,
             },
           },
         );

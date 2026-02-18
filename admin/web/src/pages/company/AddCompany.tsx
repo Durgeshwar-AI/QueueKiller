@@ -9,6 +9,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import axios from "axios";
+import { useAppSelector } from "../../hooks/reduxHooks";
 
 interface Department {
   id: number;
@@ -51,6 +52,8 @@ export default function AddCompany() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const deptTypes = ["General", "Health"];
+
+  const {token} = useAppSelector((s)=>s.auth);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -141,7 +144,7 @@ export default function AddCompany() {
 
       const response = await axios.post(`${URL}/company/register`, payload, {
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBxdWV1ZWtpbGxlci5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzA5NjQ4MjYsImV4cCI6MTc3MTU2OTYyNn0.Tude2ojNEUaoB0Xx6KrWBLb3qEYl7U9E8TwlL7UG6So`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });

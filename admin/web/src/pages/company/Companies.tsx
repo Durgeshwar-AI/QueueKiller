@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../hooks/reduxHooks";
 
 const URL = process.env.API_URL;
 
@@ -18,6 +19,8 @@ const Companies = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const {token} = useAppSelector((s)=>s.auth);
+
   const getAllCompanies = async () => {
     try {
       setLoading(true);
@@ -25,7 +28,7 @@ const Companies = () => {
 
       const { data } = await axios.get<Company[]>(`${URL}/company`, {
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBxdWV1ZWtpbGxlci5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzA5NjQ4MjYsImV4cCI6MTc3MTU2OTYyNn0.Tude2ojNEUaoB0Xx6KrWBLb3qEYl7U9E8TwlL7UG6So`,
+          Authorization: `Bearer ${token}`,
         },
       });
       console.log(data);
