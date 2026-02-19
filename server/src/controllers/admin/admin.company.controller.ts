@@ -4,6 +4,7 @@ import prisma from "../../utils/client";
 import bcrypt from "bcrypt";
 
 export const registerCompany = async (req: Request, res: Response) => {
+  console.log(req.body);
   try {
     const { name, password, logo, departments } = req.body;
 
@@ -66,7 +67,11 @@ export const getCompany = async (req: Request, res: Response) => {
       where: {
         id: Number(id),
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        key: true,
+        logo: true,
         departments: true,
       },
     });
@@ -85,11 +90,11 @@ export const getCompany = async (req: Request, res: Response) => {
 export const getAllCompanies = async (req: Request, res: Response) => {
   try {
     const companies = await prisma.company.findMany({
-      include: {
-        departments: true,
-      },
-      orderBy: {
-        createdAt: "desc",
+      select: {
+        id: true,
+        name: true,
+        key: true,
+        logo: true,
       },
     });
 
