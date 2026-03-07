@@ -25,6 +25,10 @@ export const getSchedule = async (req: Request, res: Response) => {
   try {
     const { departmentId } = req.params;
 
+    if (!departmentId) {
+      return res.status(400).json({ message: "Department ID is required" });
+    }
+
     const department = await prisma.department.findUnique({
       where: {
         id: Number(departmentId),

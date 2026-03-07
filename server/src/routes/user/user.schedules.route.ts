@@ -8,6 +8,6 @@ import {
 const router = Router();
 
 router.get("/", userAuthMiddleware, getAllSchedules);
-router.get("/:departmentsID", userAuthMiddleware, getSchedule);
+router.get("/:departmentId", userAuthMiddleware, getSchedule);
 
 export default router;
