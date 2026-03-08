@@ -2,15 +2,16 @@ import { useEffect, useState } from "react";
 import Cards from "./Cards";
 import axios from "axios";
 
-
 interface departmentProps {
-  companyId: string;
-  companyName: string;
-  department: {
-    _id: string;
+  id: number;
+  name: string;
+  type: string;
+  companyId: number;
+  company: {
     name: string;
-    type: string;
-  }
+    logo: string | null;
+  };
+  createdAt: string;
 }
 
 const URL = process.env.API_URL;
@@ -22,8 +23,12 @@ const AllDepartments = () => {
     const fetchDepartments = async () => {
       console.log(URL);
       try {
-        const result = await axios.get(`${URL}/api/departments/all`);
-        console.log(result.data.departments)
+        const result = await axios.get(`${URL}/api/user/schedules`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        console.log(result.data.departments);
         setDepartments(result.data.departments);
       } catch (err) {
         console.log(err);
@@ -35,16 +40,17 @@ const AllDepartments = () => {
 
   return (
     <div className="grid grid-cols-3 gap-6 p-8 max-w-[1200px] mx-auto mb-16">
-      {departments && departments.map((dept) => (
-        <Cards
-          key={dept.department._id}
-          id={dept.department._id}
-          company={dept.companyName}
-          department={dept.department.name}
-          description={dept.department.name}
-          type={dept.department.type}
-        />
-      ))}
+      {departments &&
+        departments.map((dept) => (
+          <Cards
+            key={dept.id}
+            id={dept.id}
+            company={dept.company.name}
+            department={dept.name}
+            description={dept.name}
+            type={dept.type}
+          />
+        ))}
     </div>
   );
 };

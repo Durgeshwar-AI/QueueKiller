@@ -2,7 +2,7 @@ import { Building2, Hospital } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export interface CardProps {
-  id: string;
+  id: number;
   company: string;
   department: string;
   description: string;
