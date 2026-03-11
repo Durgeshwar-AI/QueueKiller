@@ -51,3 +51,32 @@ export const companyLogout = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const companyPing = async (req: Request, res: Response) => {
+  const companyId = req.body.company?.id;
+  console.log(companyId);
+
+  try {
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
+    });
+    console.log(company);
+    if (!company) {
+      return res.status(401).json({ message: "No company found" });
+    }
+
+    const token = generateCompanyToken(company.key, company.id);
+    console.log(token);
+
+    res.status(200).json({
+      token,
+      company: {
+        id: company.id,
+        name: company.name,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

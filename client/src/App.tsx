@@ -27,10 +27,32 @@ const App = () => {
   const [hasPinged, setHasPinged] = useState(false);
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const accountType = localStorage.getItem("accountType");
     if (!token) return;
 
     const ping = async () => {
-      try {
+      if(accountType === "company"){
+        try {
+          const { data } = await axios.get(`${URL}/api/company/auth/ping`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          dispatch(
+            login({
+              token: data.token,
+              name: data.name,
+              accountType: "company",
+            }),
+          );
+        } catch (err) {
+          console.log(err);
+          localStorage.clear();
+          dispatch(logout());
+        }
+      }
+      else{
+        try {
         const { data } = await axios.get(`${URL}/api/user/auth/ping`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -47,7 +69,7 @@ const App = () => {
         console.log(err);
         localStorage.clear();
         dispatch(logout());
-      }
+      }}
       setHasPinged(true);
     };
 
