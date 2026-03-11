@@ -78,7 +78,9 @@ const App = () => {
             <Route path="/company-login" element={<CompanyLogin />} />
           </>
         )}
-        <Route path="/company" element={<CompanyDashboard/>}/>
+        {isLoggedIn && accountType === "company" && (
+          <Route path="/company" element={<CompanyDashboard/>}/>
+        )}
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </div>
