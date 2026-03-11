@@ -18,6 +18,10 @@ export const companyAuthMiddleware = (
     return res.status(401).json({ message: "Invalid token" });
   }
 
+  if (!req.body) {
+    req.body = {};
+  }
+
   req.body.company = {
     id: decoded.id,
     key: decoded.key,
