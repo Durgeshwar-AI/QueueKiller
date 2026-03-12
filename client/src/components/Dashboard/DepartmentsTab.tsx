@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
-import { Plus, Edit2, Trash2, AlertCircle, Building2, CheckCircle } from "lucide-react";
+import { Plus, Edit2, AlertCircle, Building2, CheckCircle } from "lucide-react";
 import axios, { AxiosError } from "axios";
 import { motion } from "motion/react";
 
 interface Department {
-  id: string;
+  id: number;
+  companyId: number;
+  createdAt: string;
   name: string;
-  description: string;
-  queue_count: number;
-  active: boolean;
+  type: string;
+  description?: string;
 }
 
 interface FormErrors {
   name?: string;
   description?: string;
+  type?: string;
 }
 
 const DepartmentsTab = () => {
@@ -24,9 +26,14 @@ const DepartmentsTab = () => {
   const [showForm, setShowForm] = useState(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({ name: "", description: "" });
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    type: "General",
+  });
+  const [editingDeptId, setEditingDeptId] = useState<number | null>(null);
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const API_URL = process.env.API_URL;
 
   useEffect(() => {
     fetchDepartments();
@@ -49,7 +56,8 @@ const DepartmentsTab = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setDepartments(response.data);
+      console.log(response);
+      setDepartments(response.data.departments);
     } catch (err) {
       const error = err as AxiosError<{ message: string }> | Error;
       if (error instanceof AxiosError && error.response?.data?.message) {
@@ -70,11 +78,14 @@ const DepartmentsTab = () => {
     if (formData.name.trim().length < 2) {
       errors.name = "Department name must be at least 2 characters";
     }
+    if (!formData.type || !formData.type.trim()) {
+      errors.type = "Department type is required";
+    }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  const handleAddDepartment = async (e: React.FormEvent) => {
+  const handleSubmitDepartment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
@@ -82,14 +93,33 @@ const DepartmentsTab = () => {
       setIsSubmitting(true);
       setError(null);
       const token = localStorage.getItem("token");
-      await axios.post(`${API_URL}/api/company/departments`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setFormData({ name: "", description: "" });
+      const payload = {
+        name: formData.name,
+        description: formData.description,
+        type: formData.type,
+      };
+      if (editingDeptId) {
+        await axios.put(
+          `${API_URL}/api/company/departments/${editingDeptId}`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        setSuccess("Department updated successfully!");
+      } else {
+        await axios.post(`${API_URL}/api/company/departments`, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setSuccess("Department created successfully!");
+      }
+      setFormData({ name: "", description: "", type: "General" });
+      setEditingDeptId(null);
       setShowForm(false);
-      setSuccess("Department created successfully!");
       fetchDepartments();
     } catch (err) {
       const error = err as AxiosError<{ message: string }> | Error;
@@ -103,29 +133,7 @@ const DepartmentsTab = () => {
     }
   };
 
-  const handleDeleteDepartment = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this department? This action cannot be undone.")) {
-      return;
-    }
-    try {
-      setError(null);
-      const token = localStorage.getItem("token");
-      await axios.delete(`${API_URL}/api/company/departments/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setSuccess("Department deleted successfully!");
-      fetchDepartments();
-    } catch (err) {
-      const error = err as AxiosError<{ message: string }> | Error;
-      if (error instanceof AxiosError && error.response?.data?.message) {
-        setError(error.response.data.message);
-      } else {
-        setError("Failed to delete department");
-      }
-    }
-  };
+  // deletion removed from UI per request
 
   if (loading) {
     return (
@@ -133,7 +141,10 @@ const DepartmentsTab = () => {
         <div className="h-16 bg-gradient-to-r from-slate-200 to-slate-100 rounded-lg animate-pulse" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-white rounded-lg border border-slate-200 p-6 animate-pulse">
+            <div
+              key={i}
+              className="bg-white rounded-lg border border-slate-200 p-6 animate-pulse"
+            >
               <div className="h-6 bg-slate-200 rounded w-3/4 mb-4" />
               <div className="h-4 bg-slate-100 rounded w-full mb-2" />
               <div className="h-4 bg-slate-100 rounded w-2/3" />
@@ -176,13 +187,18 @@ const DepartmentsTab = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Departments</h2>
-          <p className="text-slate-600 text-sm mt-1">Manage your company departments and their settings</p>
+          <p className="text-slate-600 text-sm mt-1">
+            Manage your company departments and their settings
+          </p>
         </div>
         <button
           onClick={() => {
             setShowForm(!showForm);
             setFormErrors({});
-            if (showForm) setFormData({ name: "", description: "" });
+            if (showForm) {
+              setFormData({ name: "", description: "", type: "General" });
+              setEditingDeptId(null);
+            }
           }}
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200 font-medium"
         >
@@ -195,7 +211,7 @@ const DepartmentsTab = () => {
         <motion.form
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          onSubmit={handleAddDepartment}
+          onSubmit={handleSubmitDepartment}
           className="bg-white rounded-lg border border-slate-200 p-6 shadow-sm"
         >
           <div className="space-y-4">
@@ -209,7 +225,8 @@ const DepartmentsTab = () => {
                 value={formData.name}
                 onChange={(e) => {
                   setFormData({ ...formData, name: e.target.value });
-                  if (formErrors.name) setFormErrors({ ...formErrors, name: undefined });
+                  if (formErrors.name)
+                    setFormErrors({ ...formErrors, name: undefined });
                 }}
                 className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-all ${
                   formErrors.name
@@ -217,7 +234,9 @@ const DepartmentsTab = () => {
                     : "border-slate-300 focus:ring-blue-500"
                 }`}
               />
-              {formErrors.name && <p className="text-red-600 text-sm mt-1">{formErrors.name}</p>}
+              {formErrors.name && (
+                <p className="text-red-600 text-sm mt-1">{formErrors.name}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
@@ -233,6 +252,32 @@ const DepartmentsTab = () => {
                 rows={3}
               />
             </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
+                Type *
+              </label>
+              <select
+                value={formData.type}
+                onChange={(e) => {
+                  setFormData({ ...formData, type: e.target.value });
+                  if (formErrors.type)
+                    setFormErrors({ ...formErrors, type: undefined });
+                }}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-all ${
+                  formErrors.type
+                    ? "border-red-300 focus:ring-red-500"
+                    : "border-slate-300 focus:ring-blue-500"
+                }`}
+              >
+                <option value="General">General</option>
+                <option value="Technical">Technical</option>
+                <option value="Support">Support</option>
+                <option value="Sales">Sales</option>
+              </select>
+              {formErrors.type && (
+                <p className="text-red-600 text-sm mt-1">{formErrors.type}</p>
+              )}
+            </div>
           </div>
           <div className="flex gap-3 mt-6">
             <button
@@ -240,13 +285,20 @@ const DepartmentsTab = () => {
               disabled={isSubmitting}
               className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
             >
-              {isSubmitting ? "Creating..." : "Create Department"}
+              {isSubmitting
+                ? editingDeptId
+                  ? "Saving..."
+                  : "Creating..."
+                : editingDeptId
+                  ? "Save Changes"
+                  : "Create Department"}
             </button>
             <button
               type="button"
               onClick={() => {
                 setShowForm(false);
-                setFormData({ name: "", description: "" });
+                setFormData({ name: "", description: "", type: "General" });
+                setEditingDeptId(null);
                 setFormErrors({});
               }}
               className="px-6 py-2 bg-slate-200 text-slate-900 rounded-lg hover:bg-slate-300 transition-colors font-medium"
@@ -266,7 +318,9 @@ const DepartmentsTab = () => {
           >
             <Building2 size={48} className="mx-auto text-slate-300 mb-4" />
             <p className="text-slate-600 font-medium">No departments yet</p>
-            <p className="text-slate-500 text-sm mt-1">Click "Add Department" to create your first one</p>
+            <p className="text-slate-500 text-sm mt-1">
+              Click "Add Department" to create your first one
+            </p>
           </motion.div>
         ) : (
           departments.map((dept, index) => (
@@ -282,38 +336,44 @@ const DepartmentsTab = () => {
                   <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
                     <Building2 size={20} className="text-blue-600" />
                   </div>
-                  <h3 className="font-semibold text-slate-900 text-lg">{dept.name}</h3>
+                  <h3 className="font-semibold text-slate-900 text-lg">
+                    {dept.name}
+                  </h3>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
-                    onClick={() => {}}
+                    onClick={() => {
+                      setEditingDeptId(dept.id);
+                      setFormData({
+                        name: dept.name,
+                        description: dept.description || "",
+                        type: dept.type || "General",
+                      });
+                      setFormErrors({});
+                      setShowForm(true);
+                    }}
                     className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
                     title="Edit department"
                   >
                     <Edit2 size={16} className="text-slate-600" />
                   </button>
-                  <button
-                    onClick={() => handleDeleteDepartment(dept.id)}
-                    className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete department"
-                  >
-                    <Trash2 size={16} className="text-red-600" />
-                  </button>
                 </div>
               </div>
-              <p className="text-sm text-slate-600 mb-4 line-clamp-2">{dept.description || "No description provided"}</p>
+              <div className="text-sm text-slate-600 mb-4">
+                <p className="line-clamp-2">
+                  {dept.description || "No description provided"}
+                </p>
+                <p className="text-xs text-slate-500">Dept ID: {dept.id}</p>
+              </div>
               <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                <span className="text-xs font-medium text-slate-500 bg-slate-50 px-2 py-1 rounded">
-                  {dept.queue_count} queue{dept.queue_count !== 1 ? "s" : ""}
-                </span>
+                {/* <span className="text-xs font-medium text-slate-500 bg-slate-50 px-2 py-1 rounded">
+                  {dept.schedules?.length ?? 0} schedule
+                  {(dept.schedules?.length ?? 0) !== 1 ? "s" : ""}
+                </span> */}
                 <span
-                  className={`text-xs font-semibold px-3 py-1 rounded-full transition-colors ${
-                    dept.active
-                      ? "bg-green-100 text-green-700"
-                      : "bg-slate-100 text-slate-600"
-                  }`}
+                  className={`text-xs font-semibold px-3 py-1 rounded-full transition-colors bg-slate-100 text-slate-600`}
                 >
-                  {dept.active ? "✓ Active" : "Inactive"}
+                  {dept.type}
                 </span>
               </div>
             </motion.div>
