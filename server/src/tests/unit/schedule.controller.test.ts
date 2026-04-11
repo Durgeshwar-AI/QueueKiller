@@ -1,177 +1,131 @@
-// import {
-//   bookSchedule,
-//   createSchedule,
-//   deleteSchedule,
-//   getSchedule,
-// } from "../../controllers/schedule.controller";
-// import Schedule from "../../models/schedule.model";
+import { Request, Response } from "express";
 
-// // mock the Schedule model before importing the controller so imports receive the mock
-// jest.mock("../../models/schedule.model", () => ({
-//   default: {
-//     findOne: jest.fn(),
-//     create: jest.fn(),
-//     deleteOne: jest.fn(),
-//   },
-// }));
+jest.mock("../../utils/client", () => ({
+  __esModule: true,
+  default: {
+    department: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+    },
+  },
+}));
 
-// // ensure the imported Schedule has jest mock functions (some runners return real module)
-// const MockSchedule = Schedule as unknown as any;
-// MockSchedule.findOne = MockSchedule.findOne || jest.fn();
-// MockSchedule.create = MockSchedule.create || jest.fn();
-// MockSchedule.deleteOne = MockSchedule.deleteOne || jest.fn();
+import prisma from "../../utils/client";
+import {
+  getAllSchedules,
+  getSchedule,
+} from "../../controllers/user/user.schedules.controller";
 
-// describe("createSchedule controller", () => {
-//   beforeEach(() => {
-//     jest.clearAllMocks();
-//   });
+describe("User Schedules Controller", () => {
+  let mockRequest: Partial<Request>;
+  let mockResponse: Partial<Response>;
+  let responseObject: Record<string, unknown>;
 
-//   test("createSchedule creates a new schedule when none exists for the date", async () => {
-//     (MockSchedule.findOne as jest.Mock).mockResolvedValue(null);
-//     (MockSchedule.create as jest.Mock).mockResolvedValue({
-//       _id: "fakeid",
-//       company: "ABC",
-//       date: "2024-10-10",
-//       start: "10:00",
-//       end: "11:00",
-//     });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(console, "log").mockImplementation(() => undefined);
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+    mockRequest = { params: {} };
+    responseObject = {};
+    mockResponse = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn().mockImplementation((result) => {
+        responseObject = result as Record<string, unknown>;
+      }),
+    };
+  });
 
-//     const req = {
-//       body: { company: "ABC", date: "2024-10-10", start: "10:00", end: "11:00" },
-//     } as unknown as any;
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
-//     const res = {
-//       status: jest.fn().mockReturnThis(),
-//       json: jest.fn(),
-//     } as unknown as any;
-//     try {
-//       await createSchedule(req, res);
-//     } catch (err) {
-//       console.error("createSchedule threw", err);
-//       throw err;
-//     }
-//     expect(res.status).toHaveBeenCalledWith(201);
-//     expect(res.json).toHaveBeenCalledWith(
-//       expect.objectContaining({
-//         message: "Schedule created successfully",
-//       }),
-//     );
-//   });
-// });
+  describe("getAllSchedules", () => {
+    it("should return departments list", async () => {
+      const departments = [{ id: 1, name: "Sales" }];
+      (prisma.department.findMany as jest.Mock).mockResolvedValue(departments);
 
-// describe("Get Schedule controller", () => {
-//   test("getSchedule to get all the schedules", async () => {
-//     const req = {
-//       query: { company: "ABC", department: "General", date: "2024-10-10" },
-//     } as unknown as any;
-//     const res = {
-//       status: jest.fn().mockReturnThis(),
-//       json: jest.fn(),
-//     } as unknown as any;
+      await getAllSchedules(mockRequest as Request, mockResponse as Response);
 
-//     (MockSchedule.findOne as jest.Mock).mockResolvedValue({
-//       schedules: [{ id: "1", start: "10:00", end: "11:00" }],
-//     });
+      expect(prisma.department.findMany).toHaveBeenCalledWith({
+        include: {
+          company: {
+            select: {
+              name: true,
+              logo: true,
+            },
+          },
+        },
+      });
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(responseObject).toEqual({ departments });
+    });
 
-//     try {
-//       await getSchedule(req, res);
-//     } catch (err) {
-//       console.error("getSchedule threw", err);
-//       throw err;
-//     }
+    it("should return 500 when repository throws", async () => {
+      (prisma.department.findMany as jest.Mock).mockRejectedValue(
+        new Error("db error"),
+      );
 
-//     expect(res.status).toHaveBeenCalledWith(200);
-//     expect(res.json).toHaveBeenCalledWith(
-//       expect.objectContaining({
-//         schedule: expect.any(Array),
-//       }),
-//     );
-//   });
-// });
+      await getAllSchedules(mockRequest as Request, mockResponse as Response);
 
-// describe("Book Schedule Controller", () => {
-//   test("Testing for booking a schedule by the user", async () => {
-//   const req = {
-//     body: {
-//       schedulesId: "507f191e810c19729de860ee",
-//       id: "c-001",
-//     },
-//     user: {
-//       _id: "507f191e810c19729de860ea", // <-- FIX HERE
-//     },
-//   } as unknown as any;
+      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(responseObject).toEqual({ message: "Internal server error" });
+    });
+  });
 
-//   const res = {
-//     status: jest.fn().mockReturnThis(),
-//     json: jest.fn(),
-//   } as unknown as any;
+  describe("getSchedule", () => {
+    it("should return 400 when departmentId is missing", async () => {
+      mockRequest.params = {};
 
-//   const mockScheduleDoc = {
-//     date: "2024-10-10",
-//     schedules: [
-//       {
-//         id: "c-001",
-//         start: "10:00",
-//         end: "11:00",
-//         booked: false,
-//         customerId: null,
-//       },
-//     ],
-//     save: jest.fn().mockResolvedValue(true),
-//   };
+      await getSchedule(mockRequest as Request, mockResponse as Response);
 
-//   (MockSchedule.findOne as jest.Mock).mockResolvedValue(mockScheduleDoc);
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(responseObject).toEqual({ message: "Department ID is required" });
+      expect(prisma.department.findUnique).not.toHaveBeenCalled();
+    });
 
-//   await bookSchedule(req, res);
+    it("should return 404 when department does not exist", async () => {
+      mockRequest.params = { departmentId: "10" };
+      (prisma.department.findUnique as jest.Mock).mockResolvedValue(null);
 
-//   expect(res.status).toHaveBeenCalledWith(200);
-//   expect(res.json).toHaveBeenCalledWith(
-//     expect.objectContaining({
-//       message: "Booked successfully",
-//     }),
-//   );
+      await getSchedule(mockRequest as Request, mockResponse as Response);
 
-//   expect(mockScheduleDoc.schedules[0].booked).toBe(true);
-//   expect(mockScheduleDoc.schedules[0].customerId).not.toBeNull();
-// });
+      expect(prisma.department.findUnique).toHaveBeenCalledWith({
+        where: {
+          id: 10,
+        },
+        include: {
+          schedules: true,
+        },
+      });
+      expect(mockResponse.status).toHaveBeenCalledWith(404);
+      expect(responseObject).toEqual({ message: "Department not found" });
+    });
 
-// });
+    it("should return schedules for a valid department", async () => {
+      mockRequest.params = { departmentId: "5" };
+      (prisma.department.findUnique as jest.Mock).mockResolvedValue({
+        id: 5,
+        schedules: [{ id: 1, status: "Available" }],
+      });
 
+      await getSchedule(mockRequest as Request, mockResponse as Response);
 
-// describe("Delete Schedule controller", () => {
-//   test("Testing for deleting a schedule", async () => {
-//     const req = {
-//       params: { date: "2024-10-10", id: "c-001" },
-//     } as unknown as any;
-//     const res = {
-//       status: jest.fn().mockReturnThis(),
-//       json: jest.fn(),
-//     } as unknown as any;
-//     const mockScheduleDoc = {
-//       date: "2024-10-10",
-//       schedules: [
-//         {
-//           id: "c-001",
-//           start: "10:00",
-//           end: "11:00",
-//           booked: false,
-//           customerId: null,
-//         },
-//       ],
-//       save: jest.fn().mockResolvedValue(true),
-//     };
-//     (MockSchedule.findOne as jest.Mock).mockResolvedValue(mockScheduleDoc);
-//     try {
-//       await deleteSchedule(req, res);
-//     } catch (err) {
-//       console.error("deleteSchedule threw", err);
-//       throw err;
-//     }
-//     expect(res.status).toHaveBeenCalledWith(200);
-//     expect(res.json).toHaveBeenCalledWith(
-//       expect.objectContaining({
-//         message: "Delete Successful",
-//       }),
-//     );
-//   });
-// });
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(responseObject).toEqual({
+        schedules: [{ id: 1, status: "Available" }],
+      });
+    });
+
+    it("should return 500 when department query throws", async () => {
+      mockRequest.params = { departmentId: "2" };
+      (prisma.department.findUnique as jest.Mock).mockRejectedValue(
+        new Error("boom"),
+      );
+
+      await getSchedule(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(responseObject).toEqual({ message: "Internal server error" });
+    });
+  });
+});

@@ -1,185 +1,99 @@
-// process.env.JWT_SECRET = "change-me-in-production";
-// process.env.NODE_ENV = "test";
+import express, { NextFunction, Request, Response } from "express";
+import request from "supertest";
 
-// jest.setTimeout(20000);
+jest.mock("../../middlewares/user.middlewares", () => ({
+  userAuthMiddleware: jest.fn(
+    (req: Request, _res: Response, next: NextFunction) => {
+      if (!req.body) {
+        req.body = {};
+      }
+      req.body.user = { id: 1, email: "user@test.com" };
+      next();
+    },
+  ),
+}));
 
-// import mongoose from "mongoose";
-// import { MongoMemoryServer } from "mongodb-memory-server";
-// import request from "supertest";
-// import jwt from "jsonwebtoken";
+jest.mock("../../utils/client", () => ({
+  __esModule: true,
+  default: {
+    department: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+    },
+  },
+}));
 
-// import app from "../../app";
-// import Schedule from "../../models/schedule.model";
-// import { connectRedis, stopRedis } from "../../utils/redis";
-// import { fillBucket } from "../../middlewares/rateLimiter";
+import prisma from "../../utils/client";
+import { userAuthMiddleware } from "../../middlewares/user.middlewares";
+import schedulesRouter from "../../routes/user/user.schedules.route";
 
-// const BASE = process.env.TEST_BASE_PATH || "/api/schedule";
+describe("User Schedules Route Integration", () => {
+  const app = express();
+  app.use(express.json());
+  app.use("/api/user/schedules", schedulesRouter);
 
-// describe("Schedule Integration Tests", () => {
-//   let mongoServer: MongoMemoryServer;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (userAuthMiddleware as jest.Mock).mockImplementation(
+      (req: Request, _res: Response, next: NextFunction) => {
+        if (!req.body) {
+          req.body = {};
+        }
+        req.body.user = { id: 1, email: "user@test.com" };
+        next();
+      },
+    );
+  });
 
-//   // ------------------------
-//   // SETUP
-//   // ------------------------
-//   beforeAll(async () => {
-//     // Redis (required by rate limiter)
-//     await connectRedis();
-//     await fillBucket();
+  it("GET /api/user/schedules should return departments", async () => {
+    (prisma.department.findMany as jest.Mock).mockResolvedValue([
+      {
+        id: 3,
+        name: "Support",
+        company: { name: "Acme", logo: "logo.png" },
+      },
+    ]);
 
-//     // MongoDB Memory Server
-//     mongoServer = await MongoMemoryServer.create();
-//     const uri = mongoServer.getUri();
+    const response = await request(app).get("/api/user/schedules");
 
-//     process.env.MONGO_URI = uri;
-//     process.env.JWT_SECRET = "change-me-in-production";
+    expect(response.status).toBe(200);
+    expect(response.body.departments).toHaveLength(1);
+    expect(userAuthMiddleware).toHaveBeenCalled();
+  });
 
-//     if (mongoose.connection.readyState !== 0) {
-//       await mongoose.disconnect();
-//     }
+  it("GET /api/user/schedules/:departmentId should return schedule list", async () => {
+    (prisma.department.findUnique as jest.Mock).mockResolvedValue({
+      id: 5,
+      schedules: [{ id: 11, status: "Available" }],
+    });
 
-//     await mongoose.connect(uri, { dbName: "test" });
-//   });
+    const response = await request(app).get("/api/user/schedules/5");
 
-//   // ------------------------
-//   // TEARDOWN
-//   // ------------------------
-//   afterAll(async () => {
-//     await mongoose.disconnect();
-//     await stopRedis();
-//     await mongoServer.stop();
-//   });
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      schedules: [{ id: 11, status: "Available" }],
+    });
+  });
 
-//   beforeEach(async () => {
-//     await Schedule.deleteMany({});
-//   });
+  it("GET /api/user/schedules/:departmentId should return 404 when department missing", async () => {
+    (prisma.department.findUnique as jest.Mock).mockResolvedValue(null);
 
-//   // ------------------------
-//   // TESTS
-//   // ------------------------
-//   test("create → get → book → delete flow", async () => {
-//     const company = "acme";
-//     const department = "sales";
-//     const date = "2025-10-23";
+    const response = await request(app).get("/api/user/schedules/999");
 
-//     // ------------------------
-//     // JWT TOKENS
-//     // ------------------------
-//     const userId = new mongoose.Types.ObjectId().toString();
-//     const token = jwt.sign(
-//       { _id: userId, email: "user@test.com", role: "user" },
-//       process.env.JWT_SECRET!,
-//       { expiresIn: "1h" },
-//     );
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({ message: "Department not found" });
+  });
 
-//     const anotherUserId = new mongoose.Types.ObjectId().toString();
-//     const anotherToken = jwt.sign(
-//       { _id: anotherUserId, email: "other@test.com", role: "user" },
-//       process.env.JWT_SECRET!,
-//       { expiresIn: "1h" },
-//     );
+  it("should return 401 when auth middleware blocks request", async () => {
+    (userAuthMiddleware as jest.Mock).mockImplementationOnce(
+      (_req: Request, res: Response) => {
+        res.status(401).json({ message: "Unauthorized" });
+      },
+    );
 
-//     // ------------------------
-//     // CREATE SLOT
-//     // ------------------------
-//     const createRes = await request(app)
-//       .post(`${BASE}/create`)
-//       .send({
-//         company,
-//         department,
-//         date,
-//         start: "09:00",
-//         end: "10:00",
-//       })
-//       .expect(201);
+    const response = await request(app).get("/api/user/schedules");
 
-//     expect(createRes.body.message).toBe("Schedule created successfully");
-
-//     // ------------------------
-//     // GET SLOT
-//     // ------------------------
-//     const getRes = await request(app)
-//       .get(BASE)
-//       .query({ company, department, date })
-//       .expect(200);
-
-//     expect(getRes.body.schedule.length).toBe(1);
-
-//     const slot = getRes.body.schedule[0];
-//     expect(slot.start).toBe("09:00");
-
-//     // ------------------------
-//     // DB CHECK
-//     // ------------------------
-//     const doc = await Schedule.findOne({ company, department, date }).lean();
-//     expect(doc).toBeTruthy();
-
-//     const schedulesId = doc!._id.toString();
-//     const slotId = doc!.schedules[0].id;
-
-//     // ------------------------
-//     // BOOK SLOT
-//     // ------------------------
-//     const bookRes = await request(app)
-//       .put(`${BASE}/book`)
-//       .set("authorization", `Bearer ${token}`)
-//       .send({ schedulesId, id: slotId })
-//       .expect(200);
-
-//     expect(bookRes.body.message).toBe("Booked successfully");
-
-//     // ------------------------
-//     // BOOK AGAIN (FAIL)
-//     // ------------------------
-//     await request(app)
-//       .put(`${BASE}/book`)
-//       .set("authorization", `Bearer ${anotherToken}`)
-//       .send({ schedulesId, id: slotId })
-//       .expect(400);
-
-//     // ------------------------
-//     // DELETE BOOKED SLOT (FAIL)
-//     // ------------------------
-//     await request(app).delete(`${BASE}/delete/${slotId}`).expect(400);
-
-//     // ------------------------
-//     // CREATE SECOND SLOT
-//     // ------------------------
-//     const createRes2 = await request(app)
-//       .post(`${BASE}/create`)
-//       .send({
-//         company,
-//         department,
-//         date,
-//         start: "10:00",
-//         end: "11:00",
-//       })
-//       .expect(200);
-
-//     expect(createRes2.body.message).toBe("Schedule updated successfully");
-
-//     // ------------------------
-//     // DELETE UNBOOKED SLOT
-//     // ------------------------
-//     const doc2 = await Schedule.findOne({ company, department, date }).lean();
-//     const newSlot = doc2!.schedules.find((s: any) => s.start === "10:00");
-
-//     expect(newSlot).toBeTruthy();
-
-//     await request(app).delete(`${BASE}/delete/${newSlot!.id}`).expect(200);
-//   });
-
-//   test("get non-existing schedule returns 204", async () => {
-//     await request(app)
-//       .get(BASE)
-//       .query({
-//         company: "none",
-//         department: "none",
-//         date: "2099-01-01",
-//       })
-//       .expect(204);
-//   });
-
-//   test("delete non-existing slot returns 204", async () => {
-//     await request(app).delete(`${BASE}/delete/non-existent-id`).expect(204);
-//   });
-// });
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({ message: "Unauthorized" });
+  });
+});
