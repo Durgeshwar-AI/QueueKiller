@@ -10,9 +10,9 @@ test("renders hero section text", () => {
       <MemoryRouter>
         <Landing />
       </MemoryRouter>
-    </Provider>
+    </Provider>,
   );
 
-  const heroText = screen.getByText(/book appointments with ease/i);
+  const heroText = screen.getByText(/eliminate queue chaos/i);
   expect(heroText).toBeInTheDocument();
 });
