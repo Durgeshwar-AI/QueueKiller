@@ -1,11 +1,16 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-import EnvironmentPlugin from 'vite-plugin-environment'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import EnvironmentPlugin from "vite-plugin-environment";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(),tailwindcss(),
-    EnvironmentPlugin('all')
+  plugins: [
+    react(),
+    tailwindcss(),
+    EnvironmentPlugin({
+      API_URL: process.env.API_URL,
+      RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
+    }),
   ],
-})
+});
