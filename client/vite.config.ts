@@ -9,8 +9,8 @@ export default defineConfig({
     react(),
     tailwindcss(),
     EnvironmentPlugin({
-      API_URL: process.env.API_URL,
-      RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
+      API_URL: process.env.API_URL || "https://api.example.com",
+      RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || "",
     }),
   ],
 });
