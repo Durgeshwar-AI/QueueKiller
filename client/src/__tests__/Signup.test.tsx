@@ -4,12 +4,14 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import Signup from "../pages/Signup";
-import authReducer, { type IauthState } from "../redux/auth/authSlice";
+import authReducer from "../redux/auth/authSlice";
+import type { IAuthState } from "../types";
 
 /* -------------------- Base auth state -------------------- */
-const baseAuthState: IauthState = {
-  role: "",
+const baseAuthState: IAuthState = {
+  accountType: null,
   name: "",
+  email: null,
   token: "",
   isLoggedIn: false,
   loading: false,
@@ -31,7 +33,7 @@ jest.mock("react-router-dom", () => {
 const mockFetch = jest.fn();
 
 /* -------------------- Store factory -------------------- */
-const makeStore = (preloadedAuth?: Partial<IauthState>) =>
+const makeStore = (preloadedAuth?: Partial<IAuthState>) =>
   configureStore({
     reducer: { auth: authReducer },
     preloadedState: { auth: { ...baseAuthState, ...preloadedAuth } },
@@ -101,7 +103,7 @@ test("submits signup and navigates home on success", async () => {
     ok: true,
     json: async () => ({
       token: "new-token",
-      user: { name: "Jane Doe", role: "user" },
+      user: { name: "Jane Doe", email: "jane@example.com", accountType: "user" },
     }),
   });
 
