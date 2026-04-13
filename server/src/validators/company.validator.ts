@@ -18,8 +18,6 @@ export const companyRegisterValidation = [
     )
     .withMessage("Each department must be a non-empty string"),
 
-  body("email").trim().isEmail().withMessage("Must be a valid email address"),
-
   body("password")
     .trim()
     .isLength({ min: 6 })
@@ -27,6 +25,6 @@ export const companyRegisterValidation = [
 ];
 
 export const companyLoginValidation = [
-  body("email").trim().isEmail().withMessage("Must be a valid email"),
+  body("key").trim().notEmpty().withMessage("Key is required"),
   body("password").trim().notEmpty().withMessage("Password is required"),
 ];
