@@ -16,6 +16,7 @@ export interface IDepartment {
   type: string;
   companyId: number;
   company?: ICompany;
+  price?: number;
 }
 
 export interface ISchedule {
@@ -25,7 +26,7 @@ export interface ISchedule {
   startTime: string;
   endTime: string;
   status: "Available" | "Locked" | "Booked";
-  booked?: unknown[]; 
+  booked?: unknown[];
   department?: IDepartment;
 }
 
@@ -57,4 +58,7 @@ export interface IRazorpayResponse {
 
 export interface IPaymentData extends IRazorpayResponse {
   scheduleId: number;
+  bookingPrice?: number;
+  platformFee?: number;
+  totalAmount?: number;
 }

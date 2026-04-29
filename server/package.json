@@ -29,6 +29,8 @@
     "mongoose": "^8.18.1",
     "morgan": "^1.10.1",
     "pg": "^8.17.1",
+    "prisma": "^7.2.0",
+    "razorpay": "^2.9.6",
     "redis": "^5.9.0"
   },
   "devDependencies": {
@@ -42,6 +44,7 @@
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/mocha": "^10.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.6.2",
     "@types/pg": "^8.16.0",
@@ -59,7 +62,6 @@
     "mongodb-memory-server": "^10.2.2",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
-    "prisma": "^7.2.0",
     "redis-memory-server": "^0.13.0",
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.5",
