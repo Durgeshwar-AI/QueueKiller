@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Sidebar from "./components/Sidebar";
@@ -12,20 +12,25 @@ const App = () => {
 
   return (
     <div className="flex h-screen">
-      <Routes>
-        {!isLoggedIn && <Route path="/login" element={<Login />} />}
-        {isLoggedIn && (
-          <>
-            {<Sidebar />}
-            <div className="flex-1 overflow-auto">
+      {isLoggedIn && <Sidebar />}
+      <div className={isLoggedIn ? "flex-1 overflow-auto" : "w-full"}>
+        <Routes>
+          {!isLoggedIn ? (
+            <>
+              <Route path="/login" element={<Login />} />
+              <Route path="*" element={<Navigate to="/login" />} />
+            </>
+          ) : (
+            <>
               <Route path="/" element={<Home />} />
               <Route path="/companies" element={<Companies />} />
               <Route path="/company/:id" element={<Company />} />
               <Route path="/addcompany" element={<AddCompany />} />
-            </div>
-          </>
-        )}
-      </Routes>
+              <Route path="*" element={<Navigate to="/" />} />
+            </>
+          )}
+        </Routes>
+      </div>
     </div>
   );
 };
