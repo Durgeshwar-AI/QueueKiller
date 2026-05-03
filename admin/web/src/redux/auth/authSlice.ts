@@ -25,13 +25,18 @@ export const adminLogin = createAsyncThunk(
   "auth/adminLogin",
   async (data: LoginPayload, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${API_BASE}/api/admin/auth/login`, {
+      const res = await fetch(`${API_BASE}/api/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
-      const json = await res.json();
+      let json;
+      try {
+        json = await res.json();
+      } catch {
+        json = null;
+      }
 
       if (!res.ok) {
         return rejectWithValue(json?.message || "Admin login failed");
