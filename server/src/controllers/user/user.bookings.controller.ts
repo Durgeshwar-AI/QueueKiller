@@ -82,6 +82,17 @@ export const getBookings = async (req: Request, res: Response) => {
           email: user.email,
         },
       },
+      include: {
+        schedules: {
+          include: {
+            department: {
+              include: {
+                company: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     return res.status(200).json({ bookings });

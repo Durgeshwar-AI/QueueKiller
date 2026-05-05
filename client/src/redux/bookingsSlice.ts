@@ -27,10 +27,12 @@ export const fetchUserBookings = createAsyncThunk(
       });
       return res.data.bookings;
     } catch (err: unknown) {
-      const message = axios.isAxiosError(err) ? err.response?.data?.message : "Failed to fetch bookings";
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message
+        : "Failed to fetch bookings";
       return rejectWithValue(message || "Failed to fetch bookings");
     }
-  }
+  },
 );
 
 export const bookSchedule = createAsyncThunk(
@@ -43,41 +45,45 @@ export const bookSchedule = createAsyncThunk(
       const res = await axios.post(
         `${API_BASE}/api/user/bookings/book`,
         { id: scheduleId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-      
+
       // Step 2: Create Razorpay order
       const orderRes = await axios.post(
-          `${API_BASE}/api/user/payment/create-order`,
-          { scheduleId },
-          { headers: { Authorization: `Bearer ${token}` } }
+        `${API_BASE}/api/user/payment/create-order`,
+        { scheduleId },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       return { ...res.data, ...orderRes.data, scheduleId }; // Contains orderId, amount, etc.
     } catch (err: unknown) {
-      const message = axios.isAxiosError(err) ? err.response?.data?.message : "Failed to book schedule";
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message
+        : "Failed to book schedule";
       return rejectWithValue(message || "Failed to book schedule");
     }
-  }
+  },
 );
 
 export const verifyPayment = createAsyncThunk(
-    "bookings/verifyPayment",
-    async (paymentData: IPaymentData, { getState, rejectWithValue }) => {
-        try {
-            const state = getState() as RootState;
-            const token = state.auth.token;
-            const res = await axios.post(
-                `${API_BASE?.replace(/\/$/, "")}/api/user/payment/verify-payment`,
-                paymentData,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            return res.data.booking;
-        } catch (err: unknown) {
-            const message = axios.isAxiosError(err) ? err.response?.data?.message : "Payment verification failed";
-            return rejectWithValue(message || "Payment verification failed");
-        }
+  "bookings/verifyPayment",
+  async (paymentData: IPaymentData, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as RootState;
+      const token = state.auth.token;
+      const res = await axios.post(
+        `${API_BASE?.replace(/\/$/, "")}/api/user/payment/verify-payment`,
+        paymentData,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      return res.data.booking;
+    } catch (err: unknown) {
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message
+        : "Payment verification failed";
+      return rejectWithValue(message || "Payment verification failed");
     }
+  },
 );
 
 const bookingsSlice = createSlice({
