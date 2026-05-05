@@ -1,0 +1,14 @@
+{
+  "watch": ["src"],
+  "ext": "ts",
+  "ignore": ["src/**/*.test.ts", "node_modules"],
+  "exec": "ts-node",
+  "scripts": {
+    "before:start": "echo 'Starting server...'",
+    "restart": "echo 'Server restarted'"
+  },
+  "delay": "100",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}
