@@ -14,7 +14,12 @@ export const getAllDepartments = async (req: Request, res: Response) => {
       where: {
         companyId: company.id,
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        price: true,
+        createdAt: true,
         schedules: {
           select: {
             id: true,
@@ -54,7 +59,12 @@ export const getDepartmentById = async (
         id: parseInt(departmentID),
         companyId: company.id,
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        price: true,
+        createdAt: true,
         schedules: {
           select: {
             id: true,
@@ -83,7 +93,7 @@ export const getDepartmentById = async (
 
 export const updateDepartment = async (req: Request, res: Response) => {
   try {
-    const { id, name, type } = req.body;
+    const { id, name, type, price } = req.body;
     const { company } = req.body;
 
     if (!company || !company.id) {
@@ -106,9 +116,22 @@ export const updateDepartment = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Department not found" });
     }
 
-    const updateData: Partial<{ name: string; type: DepartmentType }> = {};
+    const updateData: Partial<{
+      name: string;
+      type: DepartmentType;
+      price: number;
+    }> = {};
     if (name) updateData.name = name;
     if (type) updateData.type = type;
+    if (price !== undefined && price !== null) {
+      // Validate price is positive
+      if (typeof price !== "number" || price <= 0) {
+        return res
+          .status(400)
+          .json({ message: "Price must be a positive number" });
+      }
+      updateData.price = price;
+    }
 
     const updatedDepartment = await prisma.department.update({
       where: { id },

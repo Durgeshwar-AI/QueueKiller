@@ -80,7 +80,7 @@ const Login = () => {
 
           <div className="mt-6 text-center space-y-4">
             <p className="text-muted-foreground">
-              Already have an account?{" "}
+              Don't have an account?{" "}
               <button
                 onClick={() => navigate("/signup")}
                 className="text-blue-500 hover:underline"

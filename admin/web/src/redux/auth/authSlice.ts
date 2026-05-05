@@ -38,6 +38,8 @@ export const adminLogin = createAsyncThunk(
         json = null;
       }
 
+      console.log(json);
+
       if (!res.ok) {
         return rejectWithValue(json?.message || "Admin login failed");
       }
@@ -73,10 +75,10 @@ const authSlice = createSlice({
         state.loading = false;
         state.isLoggedIn = true;
         state.token = action.payload.token;
-        state.name = action.payload.admin.name;
+        state.name = action.payload.user.email;
 
         localStorage.setItem("token", action.payload.token);
-        localStorage.setItem("name", action.payload.admin.name);
+        localStorage.setItem("name", action.payload.user.email);
       })
       .addCase(adminLogin.rejected, (state, action) => {
         state.loading = false;

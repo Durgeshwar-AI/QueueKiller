@@ -45,14 +45,14 @@ const CompanyLogin = () => {
           accountType: "company",
         }),
       );
-      navigate("/dashboard");
+      navigate("/company");
     } catch (err) {
       console.error("Company login failed", err);
     }
   };
 
   if (isLoggedIn) {
-    navigate("/dashboard");
+    navigate("/company");
     return null;
   }
 

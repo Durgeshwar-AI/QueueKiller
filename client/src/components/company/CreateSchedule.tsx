@@ -14,7 +14,7 @@ const CreateSchedule = ({ onCreated }: CreateScheduleProps) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setError(null);
     setSuccess(false);
 
@@ -27,22 +27,60 @@ const CreateSchedule = ({ onCreated }: CreateScheduleProps) => {
 
     setIsLoading(true);
 
-    // Simulated API call
-    setTimeout(() => {
-      console.log("Schedule created:", {
-        date: selectedDate.toISOString().split("T")[0],
-        start,
-        end,
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("You must be logged in to create a schedule");
+        setIsLoading(false);
+        return;
+      }
+
+      const apiUrl = process.env.API_URL || "http://localhost:5000";
+
+      // Get local date components to avoid timezone shifts
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+      const day = String(selectedDate.getDate()).padStart(2, "0");
+      const dateStr = `${year}-${month}-${day}`;
+
+      const response = await fetch(`${apiUrl}/api/company/schedules`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          departmentId: 1, // TODO: Get from context/params
+          date: dateStr,
+          startTime: new Date(`${dateStr}T${start}:00`).toISOString(),
+          endTime: new Date(`${dateStr}T${end}:00`).toISOString(),
+        }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to create schedule");
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Schedule created successfully:", data);
 
       setStart("");
       setEnd("");
       setSuccess(true);
       onCreated();
-      setIsLoading(false);
 
       setTimeout(() => setSuccess(false), 3000);
-    }, 500);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred";
+      setError(errorMessage);
+      console.error("Error creating schedule:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatSelectedDate = () =>
@@ -87,9 +125,7 @@ const CreateSchedule = ({ onCreated }: CreateScheduleProps) => {
               </div>
               <div>
                 <h3 className="text-xl font-bold">Add Time Slot</h3>
-                <p className="text-indigo-100 mt-1">
-                  {formatSelectedDate()}
-                </p>
+                <p className="text-indigo-100 mt-1">{formatSelectedDate()}</p>
               </div>
             </div>
           </div>

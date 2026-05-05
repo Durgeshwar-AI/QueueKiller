@@ -1,4 +1,6 @@
 import { Route, Routes } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import BookSchedule from "./pages/BookSchedule";
 import Scheduler from "./pages/Scheduler";
 import Landing from "./pages/Landing";
@@ -41,7 +43,7 @@ const App = () => {
           dispatch(
             login({
               token: data.token,
-              name: data.name,
+              name: data.company.name,
               accountType: "company",
             }),
           );
@@ -62,6 +64,7 @@ const App = () => {
           login({
             token: data.token,
             name: data.name,
+            email: data.email,
             accountType: "user",
           }),
         );
@@ -78,6 +81,7 @@ const App = () => {
 
   return (
     <div className="flex flex-col min-h-screen relative">
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored" />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/about" element={<About />} />

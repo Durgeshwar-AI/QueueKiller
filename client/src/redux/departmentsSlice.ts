@@ -28,10 +28,12 @@ export const fetchDepartments = createAsyncThunk(
       });
       return res.data.departments;
     } catch (err: unknown) {
-      const message = axios.isAxiosError(err) ? err.response?.data?.message : "Failed to fetch departments";
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message
+        : "Failed to fetch departments";
       return rejectWithValue(message || "Failed to fetch departments");
     }
-  }
+  },
 );
 
 export const createDepartment = createAsyncThunk(
@@ -43,14 +45,38 @@ export const createDepartment = createAsyncThunk(
       const res = await axios.post(
         `${API_BASE}/api/company/departments`,
         { name },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       return res.data.department;
     } catch (err: unknown) {
-      const message = axios.isAxiosError(err) ? err.response?.data?.message : "Failed to create department";
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message
+        : "Failed to create department";
       return rejectWithValue(message || "Failed to create department");
     }
-  }
+  },
+);
+
+export const updateDepartment = createAsyncThunk(
+  "departments/update",
+  async (
+    data: { id: number; name?: string; type?: string; price?: number },
+    { getState, rejectWithValue },
+  ) => {
+    try {
+      const state = getState() as RootState;
+      const token = state.auth.token;
+      const res = await axios.put(`${API_BASE}/api/company/departments`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data.department;
+    } catch (err: unknown) {
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message
+        : "Failed to update department";
+      return rejectWithValue(message || "Failed to update department");
+    }
+  },
 );
 
 const departmentsSlice = createSlice({
@@ -73,6 +99,23 @@ const departmentsSlice = createSlice({
       })
       .addCase(createDepartment.fulfilled, (state, action) => {
         state.departments.push(action.payload);
+      })
+      .addCase(updateDepartment.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateDepartment.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.departments.findIndex(
+          (d) => d.id === action.payload.id,
+        );
+        if (index !== -1) {
+          state.departments[index] = action.payload;
+        }
+      })
+      .addCase(updateDepartment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });

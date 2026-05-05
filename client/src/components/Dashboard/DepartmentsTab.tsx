@@ -1,27 +1,27 @@
 import { useEffect, useState } from "react";
 import { Plus, Edit2, AlertCircle, Building2, CheckCircle } from "lucide-react";
-import axios, { AxiosError } from "axios";
 import { motion } from "motion/react";
-
-interface Department {
-  id: number;
-  companyId: number;
-  createdAt: string;
-  name: string;
-  type: string;
-  description?: string;
-}
+import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
+import {
+  fetchDepartments,
+  createDepartment,
+  updateDepartment,
+} from "../../redux/departmentsSlice";
 
 interface FormErrors {
   name?: string;
-  description?: string;
   type?: string;
+  price?: string;
 }
 
 const DepartmentsTab = () => {
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const {
+    departments,
+    loading,
+    error: reduxError,
+  } = useAppSelector((s) => s.departments);
+
   const [success, setSuccess] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
@@ -30,14 +30,13 @@ const DepartmentsTab = () => {
     name: "",
     description: "",
     type: "General",
+    price: 100,
   });
   const [editingDeptId, setEditingDeptId] = useState<number | null>(null);
 
-  const API_URL = process.env.API_URL;
-
   useEffect(() => {
-    fetchDepartments();
-  }, []);
+    dispatch(fetchDepartments());
+  }, [dispatch]);
 
   useEffect(() => {
     if (success) {
@@ -46,40 +45,10 @@ const DepartmentsTab = () => {
     }
   }, [success]);
 
-  const fetchDepartments = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`${API_URL}/api/company/departments`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(response);
-      setDepartments(response.data.departments);
-    } catch (err) {
-      const error = err as AxiosError<{ message: string }> | Error;
-      if (error instanceof AxiosError && error.response?.data?.message) {
-        setError(error.response.data.message);
-      } else {
-        setError("Failed to fetch departments");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const validateForm = (): boolean => {
     const errors: FormErrors = {};
     if (!formData.name.trim()) {
       errors.name = "Department name is required";
-    }
-    if (formData.name.trim().length < 2) {
-      errors.name = "Department name must be at least 2 characters";
-    }
-    if (!formData.type || !formData.type.trim()) {
-      errors.type = "Department type is required";
     }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -91,43 +60,25 @@ const DepartmentsTab = () => {
 
     try {
       setIsSubmitting(true);
-      setError(null);
-      const token = localStorage.getItem("token");
-      const payload = {
-        name: formData.name,
-        description: formData.description,
-        type: formData.type,
-      };
       if (editingDeptId) {
-        await axios.put(
-          `${API_URL}/api/company/departments/${editingDeptId}`,
-          payload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+        await dispatch(
+          updateDepartment({
+            id: editingDeptId,
+            name: formData.name,
+            type: formData.type,
+            price: formData.price,
+          }),
+        ).unwrap();
         setSuccess("Department updated successfully!");
       } else {
-        await axios.post(`${API_URL}/api/company/departments`, payload, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        await dispatch(createDepartment(formData.name)).unwrap();
         setSuccess("Department created successfully!");
       }
-      setFormData({ name: "", description: "", type: "General" });
+      setFormData({ name: "", description: "", type: "General", price: 100 });
       setEditingDeptId(null);
       setShowForm(false);
-      fetchDepartments();
-    } catch (err) {
-      const error = err as AxiosError<{ message: string }> | Error;
-      if (error instanceof AxiosError && error.response?.data?.message) {
-        setError(error.response.data.message);
-      } else {
-        setError("Failed to add department");
-      }
+    } catch (err: unknown) {
+      console.log(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -157,7 +108,7 @@ const DepartmentsTab = () => {
 
   return (
     <div className="space-y-6">
-      {error && (
+      {reduxError && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -167,7 +118,7 @@ const DepartmentsTab = () => {
           <AlertCircle className="text-red-600 flex-shrink-0" size={20} />
           <div className="flex-1">
             <h3 className="font-semibold text-red-900">Error</h3>
-            <p className="text-red-700 text-sm">{error}</p>
+            <p className="text-red-700 text-sm">{reduxError}</p>
           </div>
         </motion.div>
       )}
@@ -196,7 +147,12 @@ const DepartmentsTab = () => {
             setShowForm(!showForm);
             setFormErrors({});
             if (showForm) {
-              setFormData({ name: "", description: "", type: "General" });
+              setFormData({
+                name: "",
+                description: "",
+                type: "General",
+                price: 100,
+              });
               setEditingDeptId(null);
             }
           }}
@@ -278,6 +234,40 @@ const DepartmentsTab = () => {
                 <p className="text-red-600 text-sm mt-1">{formErrors.type}</p>
               )}
             </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
+                Booking Price (₹) *
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-600 font-medium">₹</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="100000"
+                  placeholder="e.g., 500"
+                  value={formData.price}
+                  onChange={(e) => {
+                    setFormData({
+                      ...formData,
+                      price: parseInt(e.target.value) || 100,
+                    });
+                    if (formErrors.price)
+                      setFormErrors({ ...formErrors, price: undefined });
+                  }}
+                  className={`flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-all ${
+                    formErrors.price
+                      ? "border-red-300 focus:ring-red-500"
+                      : "border-slate-300 focus:ring-blue-500"
+                  }`}
+                />
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Users will pay this amount + 5% platform fee (minimum ₹100)
+              </p>
+              {formErrors.price && (
+                <p className="text-red-600 text-sm mt-1">{formErrors.price}</p>
+              )}
+            </div>
           </div>
           <div className="flex gap-3 mt-6">
             <button
@@ -297,7 +287,12 @@ const DepartmentsTab = () => {
               type="button"
               onClick={() => {
                 setShowForm(false);
-                setFormData({ name: "", description: "", type: "General" });
+                setFormData({
+                  name: "",
+                  description: "",
+                  type: "General",
+                  price: 100,
+                });
                 setEditingDeptId(null);
                 setFormErrors({});
               }}
@@ -348,6 +343,7 @@ const DepartmentsTab = () => {
                         name: dept.name,
                         description: dept.description || "",
                         type: dept.type || "General",
+                        price: dept.price || 100,
                       });
                       setFormErrors({});
                       setShowForm(true);
@@ -366,15 +362,16 @@ const DepartmentsTab = () => {
                 <p className="text-xs text-slate-500">Dept ID: {dept.id}</p>
               </div>
               <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                {/* <span className="text-xs font-medium text-slate-500 bg-slate-50 px-2 py-1 rounded">
-                  {dept.schedules?.length ?? 0} schedule
-                  {(dept.schedules?.length ?? 0) !== 1 ? "s" : ""}
-                </span> */}
-                <span
-                  className={`text-xs font-semibold px-3 py-1 rounded-full transition-colors bg-slate-100 text-slate-600`}
-                >
-                  {dept.type}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-xs font-semibold px-3 py-1 rounded-full transition-colors bg-slate-100 text-slate-600`}
+                  >
+                    {dept.type}
+                  </span>
+                </div>
+                <div className="text-sm font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                  ₹{dept.price || 100}
+                </div>
               </div>
             </motion.div>
           ))

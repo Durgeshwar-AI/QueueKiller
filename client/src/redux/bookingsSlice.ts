@@ -3,7 +3,7 @@ import axios from "axios";
 import type { IBooking, IPaymentData } from "../types";
 import type { RootState } from "./store";
 
-const API_BASE = process.env.API_URL || "http://localhost:8000";
+const API_BASE = process.env.API_URL || "http://localhost:5000";
 
 interface IBookingsState {
   bookings: IBooking[];

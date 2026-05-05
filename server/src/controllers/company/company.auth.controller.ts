@@ -19,12 +19,12 @@ export const companyLogin = async (
     });
 
     if (!company) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({ message: "Invalid ID or password" });
     }
 
     const isMatch = await bcrypt.compare(password, company.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({ message: "Invalid ID or password" });
     }
 
     const token = generateCompanyToken(company.key, company.id);

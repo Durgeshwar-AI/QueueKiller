@@ -78,12 +78,26 @@ export const createSchedule = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Department not found" });
     }
 
+    const parsedDate = new Date(date);
+    const parsedStart = new Date(startTime);
+    const parsedEnd = new Date(endTime);
+
+    if (
+      Number.isNaN(parsedDate.getTime()) ||
+      Number.isNaN(parsedStart.getTime()) ||
+      Number.isNaN(parsedEnd.getTime())
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Invalid date or time format provided" });
+    }
+
     const schedule = await prisma.schedules.create({
       data: {
         departmentId,
-        date: new Date(date),
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
+        date: parsedDate,
+        startTime: parsedStart,
+        endTime: parsedEnd,
         status: "Available",
       },
       include: {

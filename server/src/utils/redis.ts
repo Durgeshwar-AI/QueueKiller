@@ -1,17 +1,24 @@
 import { config } from "dotenv";
 import { createClient, RedisClientType } from "redis";
-import { RedisMemoryServer } from "redis-memory-server";
 
 config();
 
 let client: RedisClientType;
-let redisServer: RedisMemoryServer;
+type RedisMemoryServerInstance = {
+  getPort: () => Promise<number>;
+  stop: () => Promise<boolean>;
+};
+
+let redisServer: RedisMemoryServerInstance;
 const isTest = process.env.NODE_ENV === "test";
 
 export async function connectRedis(): Promise<RedisClientType> {
   if (!client) {
     if (isTest) {
-      if (!redisServer) redisServer = await RedisMemoryServer.create();
+      if (!redisServer) {
+        const { RedisMemoryServer } = await import("redis-memory-server");
+        redisServer = await RedisMemoryServer.create();
+      }
       const port = await redisServer.getPort();
       const uri = `redis://localhost:${port}`;
       client = createClient({ url: uri });
@@ -55,4 +62,21 @@ export const deleteRedis = async (key: string): Promise<void> => {
   const client = await connectRedis();
 
   await client.del(key);
+};
+
+// Atomic lock: SET NX (set if not exists) with expiry
+// Returns true if lock acquired, false if already locked
+export const setLockAtomic = async (
+  key: string,
+  value: string,
+  durationSeconds: number,
+): Promise<boolean> => {
+  const client = await connectRedis();
+
+  const result = await client.set(key, value, {
+    NX: true, // Only set if key does not exist
+    EX: durationSeconds, // Set expiry in seconds
+  });
+
+  return result !== null; // Returns null if key already exists, OK if set
 };
