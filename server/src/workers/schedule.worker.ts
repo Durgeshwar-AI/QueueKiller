@@ -25,7 +25,7 @@ const processJob = async (job: any) => {
 
     const markResult = await prisma.schedules.updateMany({
       where: whereMarkExpired,
-      data: { status: statusTypes.Expired as any },
+      data: { status: statusTypes.Expired },
     });
 
     console.log(
