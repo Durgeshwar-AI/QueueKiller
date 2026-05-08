@@ -360,11 +360,25 @@ const SchedulesTab = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <span
-                  className={`text-xs font-semibold px-3 py-1 rounded-full ${schedule.status === "Available" ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}`}
-                >
-                  {schedule.status}
-                </span>
+                {(() => {
+                  const status = schedule.status;
+                  let className =
+                    "text-xs font-semibold px-3 py-1 rounded-full ";
+                  let label = status;
+                  if (status === "Available") {
+                    className += "bg-green-100 text-green-700";
+                  } else if (status === "Locked") {
+                    className += "bg-yellow-100 text-yellow-800";
+                  } else if (status === "Booked") {
+                    className += "bg-rose-200 text-rose-800";
+                  } else if (status === "Expired") {
+                    className += "bg-gray-100 text-gray-600";
+                    label = "Expired";
+                  } else {
+                    className += "bg-slate-100 text-slate-600";
+                  }
+                  return <span className={className}>{label}</span>;
+                })()}
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}

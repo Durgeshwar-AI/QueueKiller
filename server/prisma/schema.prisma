@@ -97,4 +97,5 @@ enum statusTypes {
   Available
   Locked
   Booked
+  Expired
 }

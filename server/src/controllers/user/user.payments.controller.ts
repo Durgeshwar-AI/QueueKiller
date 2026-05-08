@@ -70,6 +70,15 @@ export const createOrder = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Schedule not found" });
     }
 
+    const now = new Date();
+    // Prevent creating orders for schedules that have already started
+    if (schedule.startTime && schedule.startTime <= now) {
+      return res.status(400).json({
+        message:
+          "Cannot create payment for a schedule that has already started",
+      });
+    }
+
     if (schedule.status !== "Available" && schedule.status !== "Locked") {
       return res.status(400).json({
         message: "This slot is not available for booking",
@@ -185,6 +194,20 @@ export const verifyPayment = async (req: Request, res: Response) => {
       platformFee,
       totalAmount,
     });
+
+    // Re-fetch schedule and ensure startTime hasn't passed
+    const schedule = await prisma.schedules.findUnique({
+      where: { id: scheduleId },
+    });
+    if (!schedule) {
+      return res.status(404).json({ message: "Schedule not found" });
+    }
+    const now = new Date();
+    if (schedule.startTime && schedule.startTime <= now) {
+      return res.status(400).json({
+        message: "Cannot accept payment: schedule has already started",
+      });
+    }
 
     // Update schedule status to Booked
     await prisma.schedules.update({

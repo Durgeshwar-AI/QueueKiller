@@ -25,7 +25,7 @@ export interface ISchedule {
   date: string;
   startTime: string;
   endTime: string;
-  status: "Available" | "Locked" | "Booked";
+  status: "Available" | "Locked" | "Booked" | "Expired";
   booked?: unknown[];
   department?: IDepartment;
 }

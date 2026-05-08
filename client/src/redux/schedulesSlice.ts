@@ -23,34 +23,47 @@ export const fetchSchedulesByDept = createAsyncThunk(
     try {
       const state = getState() as RootState;
       const token = state.auth.token;
-      const res = await axios.get(`${API_BASE}/api/company/schedules/${departmentID}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+        `${API_BASE}/api/company/schedules/${departmentID}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       return res.data.schedules;
     } catch (err: unknown) {
-      const message = axios.isAxiosError(err) ? err.response?.data?.message : "Failed to fetch schedules";
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message
+        : "Failed to fetch schedules";
       return rejectWithValue(message || "Failed to fetch schedules");
     }
-  }
+  },
 );
 
 export const createSchedule = createAsyncThunk(
   "schedules/create",
-  async (data: { departmentId: number; date: string; startTime: string; endTime: string }, { getState, rejectWithValue }) => {
+  async (
+    data: {
+      departmentId: number;
+      date: string;
+      startTime: string;
+      endTime: string;
+    },
+    { getState, rejectWithValue },
+  ) => {
     try {
       const state = getState() as RootState;
       const token = state.auth.token;
-      const res = await axios.post(
-        `${API_BASE}/api/company/schedules`,
-        data,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await axios.post(`${API_BASE}/api/company/schedules`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       return res.data.schedule;
     } catch (err: unknown) {
-      const message = axios.isAxiosError(err) ? err.response?.data?.message : "Failed to create schedule";
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message
+        : "Failed to create schedule";
       return rejectWithValue(message || "Failed to create schedule");
     }
-  }
+  },
 );
 
 export const deleteSchedule = createAsyncThunk(
@@ -64,10 +77,12 @@ export const deleteSchedule = createAsyncThunk(
       });
       return schedulesID;
     } catch (err: unknown) {
-      const message = axios.isAxiosError(err) ? err.response?.data?.message : "Failed to delete schedule";
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message
+        : "Failed to delete schedule";
       return rejectWithValue(message || "Failed to delete schedule");
     }
-  }
+  },
 );
 
 const schedulesSlice = createSlice({
@@ -82,7 +97,19 @@ const schedulesSlice = createSlice({
       })
       .addCase(fetchSchedulesByDept.fulfilled, (state, action) => {
         state.loading = false;
-        state.schedules = action.payload;
+        // Ensure frontend marks schedules as Expired if their startTime has already passed
+        const now = new Date();
+        state.schedules = (action.payload || []).map((s: ISchedule) => {
+          try {
+            const start = new Date(s.startTime);
+            if (start < now && s.status !== "Booked") {
+              return { ...s, status: "Expired" };
+            }
+            return s;
+          } catch {
+            return s;
+          }
+        });
       })
       .addCase(fetchSchedulesByDept.rejected, (state, action) => {
         state.loading = false;
@@ -92,7 +119,9 @@ const schedulesSlice = createSlice({
         state.schedules.push(action.payload);
       })
       .addCase(deleteSchedule.fulfilled, (state, action) => {
-        state.schedules = state.schedules.filter((s) => s.id !== action.payload);
+        state.schedules = state.schedules.filter(
+          (s) => s.id !== action.payload,
+        );
       });
   },
 });

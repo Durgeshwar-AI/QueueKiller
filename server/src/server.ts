@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 import app from "./app";
+import "./workers/schedule.worker";
 import { fillBucket, job } from "./middlewares/rateLimiter";
 import { connectRedis } from "./utils/redis";
 import prisma from "./utils/client";

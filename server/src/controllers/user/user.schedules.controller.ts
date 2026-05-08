@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../../utils/client";
 import { checkRedis } from "../../utils/redis";
+import { enqueueScheduleProcessing } from "../../utils/queue";
 
 export const getAllSchedules = async (req: Request, res: Response) => {
   try {
@@ -78,15 +79,20 @@ export const getSchedule = async (req: Request, res: Response) => {
       });
     }
 
-    // If no date provided, return all schedules (Available, Locked, Booked)
+    // If no date provided, return schedules only from cutoff (30 days back) to future
+    const lookbackCutoff = new Date();
+    lookbackCutoff.setDate(lookbackCutoff.getDate() - 30);
     if (!date) {
-      console.log("No date filter - returning all schedules");
-      const allBookable = allSchedulesForDept.filter(
-        (s) =>
-          s.status === "Available" ||
-          s.status === "Locked" ||
-          s.status === "Booked",
+      console.log("No date filter - returning schedules from cutoff to future");
+      const recentSchedules = allSchedulesForDept.filter((s) => {
+        return s.date && s.date >= lookbackCutoff;
+      });
+
+      // Include Expired as well so frontend can mark them accordingly
+      const allBookable = recentSchedules.filter((s) =>
+        ["Available", "Locked", "Booked", "Expired"].includes(s.status),
       );
+
       return res.status(200).json({
         schedules: allBookable.map((s) => ({
           id: s.id,
@@ -108,12 +114,23 @@ export const getSchedule = async (req: Request, res: Response) => {
     const targetDate = new Date(`${date}T00:00:00.000Z`);
     console.log("Parsed target date (UTC):", targetDate.toISOString());
 
+    // Enforce 30-day lookback limit
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 30);
+    if (targetDate < cutoffDate) {
+      return res.status(200).json({
+        schedules: [],
+        message: "Requested date is older than 30 days and not returned",
+      });
+    }
+
     // Include all statuses: Available (can book), Locked (in progress), Booked (already taken)
+    // Also include Expired so frontend can display expired slots
     const filteredSchedules = await prisma.schedules.findMany({
       where: {
         departmentId: Number(departmentId),
         status: {
-          in: ["Available", "Locked", "Booked"],
+          in: ["Available", "Locked", "Booked", "Expired"],
         },
         date: {
           gte: targetDate,
@@ -145,14 +162,32 @@ export const getSchedule = async (req: Request, res: Response) => {
       })),
     });
 
-    // Check Redis locks and update status accordingly
+    // Enqueue background job to mark expired and delete old schedules (deduped per department)
+    try {
+      await enqueueScheduleProcessing(Number(departmentId));
+    } catch (e) {
+      console.error("Failed to enqueue schedule processing job:", e);
+    }
+
+    // Check Redis locks and update status accordingly.
+    // Also, if startTime has passed and schedule is not Booked, expose as Expired
+    const now = new Date();
     const schedulesWithLockStatus = await Promise.all(
       filteredSchedules.map(async (schedule) => {
         const redisKey = `schedule_lock:${schedule.id}`;
         const lock = await checkRedis(redisKey);
 
-        // If locked in Redis, show as "Locked", otherwise use DB status
-        const status = lock ? "Locked" : schedule.status;
+        // If locked in Redis, show as "Locked"
+        let status = lock ? "Locked" : schedule.status;
+
+        // If startTime has passed and not booked, present as Expired
+        if (
+          schedule.startTime &&
+          schedule.startTime < now &&
+          status !== "Booked"
+        ) {
+          status = "Expired";
+        }
 
         return {
           ...schedule,

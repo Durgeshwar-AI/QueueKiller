@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import prisma from "../../utils/client";
 import { statusTypes } from "../../generated/enums";
+import { enqueueScheduleProcessing } from "../../utils/queue";
+import { checkRedis } from "../../utils/redis";
 
 export const getScheduleByDepartmentId = async (
   req: Request<{ departmentID: string }>,
@@ -26,9 +28,24 @@ export const getScheduleByDepartmentId = async (
       return res.status(404).json({ message: "Department not found" });
     }
 
+    // Enqueue background processing for this department (deduped per department)
+    try {
+      await enqueueScheduleProcessing(parseInt(departmentID));
+    } catch (e) {
+      console.error("Failed to enqueue schedule processing job (company):", e);
+    }
+
+    // Return schedules from last 30 days to future and include Expired
+    const lookbackCutoff = new Date();
+    lookbackCutoff.setDate(lookbackCutoff.getDate() - 30);
+
     const schedules = await prisma.schedules.findMany({
       where: {
         departmentId: parseInt(departmentID),
+        date: {
+          gte: lookbackCutoff,
+        },
+        status: { in: ["Available", "Locked", "Booked", "Expired"] },
       },
       include: {
         booked: {
@@ -39,11 +56,24 @@ export const getScheduleByDepartmentId = async (
           },
         },
       },
+      orderBy: { startTime: "asc" },
     });
+
+    // Map statuses by checking Redis locks and startTime
+    const now = new Date();
+    const schedulesWithStatus = await Promise.all(
+      schedules.map(async (s) => {
+        const lock = await checkRedis(`schedule_lock:${s.id}`);
+        let status = lock ? "Locked" : s.status;
+        if (s.startTime && s.startTime < now && status !== "Booked")
+          status = "Expired";
+        return { ...s, status };
+      }),
+    );
 
     res.status(200).json({
       message: "Schedules retrieved successfully",
-      schedules,
+      schedules: schedulesWithStatus,
     });
   } catch (error) {
     console.error(error);

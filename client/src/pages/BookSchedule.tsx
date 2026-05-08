@@ -176,7 +176,20 @@ const BookSchedule = () => {
           },
         );
         console.log("Schedules fetched:", res.data.schedules);
-        setSchedules(res.data.schedules);
+        // Locally mark schedules as Expired if their startTime has passed and not booked
+        const now = new Date();
+        const mapped = (res.data.schedules || []).map((s: ISchedule) => {
+          try {
+            const start = new Date(s.startTime);
+            if (start < now && s.status !== "Booked") {
+              return { ...s, status: "Expired" };
+            }
+            return s;
+          } catch {
+            return s;
+          }
+        });
+        setSchedules(mapped);
         setError(null);
       } catch (err: unknown) {
         const message = axios.isAxiosError(err)
@@ -352,14 +365,20 @@ const BookSchedule = () => {
                       </div>
                       <button
                         onClick={() => handleBooking(s.id)}
-                        disabled={s.status !== "Available" || bookingId === s.id}
+                        disabled={
+                          s.status !== "Available" || bookingId === s.id
+                        }
                         className={`px-6 py-2 rounded-lg font-bold transition-all ${
                           s.status === "Available"
                             ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md"
                             : "bg-slate-200 text-slate-400 cursor-not-allowed"
                         }`}
                       >
-                        {bookingId === s.id ? "Processing..." : s.status === "Available" ? "Book Now" : s.status}
+                        {bookingId === s.id
+                          ? "Processing..."
+                          : s.status === "Available"
+                            ? "Book Now"
+                            : s.status}
                       </button>
                     </div>
                   ))}
