@@ -37,7 +37,7 @@ QueueKiller/
 - Dashboard and landing pages
 - Redux for state management (frontend)
 - RESTful API for schedule management (backend)
-- MongoDB integration (via Mongoose)
+- PostgreSQL integration (via Prisma)
 
 ## Getting Started
 
@@ -45,7 +45,7 @@ QueueKiller/
 
 - Node.js (v16+ recommended)
 - npm or yarn
-- MongoDB (local or cloud)
+- Neon PostgreSQL
 
 ### Setup
 
@@ -71,7 +71,7 @@ cd QueueKiller
 
 #### 3. Configure environment variables
 
-- Set up your MongoDB connection string in `server/utils/db.js` or use environment variables as needed.
+- Set up your Neon PostgreSQL connection string in `server/.env` via `DATABASE_URL`.
 
 #### 4. Run the application
 
@@ -96,7 +96,7 @@ cd QueueKiller
 
 # QueueKiller Server
 
-A Node.js/Express server for managing schedules, built with TypeScript, ESM modules, Mongoose, and tested with Jest.
+A Node.js/Express server for managing schedules, built with TypeScript, ESM modules, Prisma, and tested with Jest.
 
 ---
 
@@ -105,7 +105,7 @@ A Node.js/Express server for managing schedules, built with TypeScript, ESM modu
 - TypeScript-first codebase
 - ESM module support (`"type": "module"`)
 - Express REST API for schedule management
-- MongoDB/Mongoose models
+- PostgreSQL/Prisma models
 - Jest + ts-jest for unit testing
 
 ---
@@ -116,7 +116,7 @@ A Node.js/Express server for managing schedules, built with TypeScript, ESM modu
 
 - Node.js v18+ (for stable ESM support)
 - npm
-- MongoDB
+- Neon PostgreSQL
 
 ### Installation
 
@@ -127,7 +127,8 @@ npm install
 
 ### Configuration
 
-- Copy `.env.example` to `.env` and fill in your MongoDB URI and other secrets.
+- Copy `server/.env.example` to `server/.env` and replace `DATABASE_URL` with your Neon PostgreSQL connection string.
+- Keep `sslmode=require` in the Neon URL; the server enables SSL automatically for Neon hosts.
 
 ### Scripts
 
